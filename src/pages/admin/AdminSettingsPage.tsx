@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Save,
   CheckCircle,
@@ -11,9 +11,11 @@ import {
   ShieldAlert,
   Upload,
   Image as ImageIcon,
+  Loader2,
 } from 'lucide-react';
 import { useRestaurant } from '../../context/RestaurantContext';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import { compressImageFile } from '../../utils/imageCompress';
 
 export const AdminSettingsPage: React.FC = () => {
   const { settings, updateSettings, resetToDefaultData, isDbConnected } = useRestaurant();
@@ -39,35 +41,68 @@ export const AdminSettingsPage: React.FC = () => {
       'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=1200&q=85',
   });
 
+  const [isDirty, setIsDirty] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
   const [activeTab, setActiveTab] = useState<'info' | 'supabase' | 'deployment'>('info');
   const [heroImageError, setHeroImageError] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-  const handleHeroImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Sync form when settings change from database unless admin has active unsaved edits
+  useEffect(() => {
+    if (!isDirty) {
+      setForm({
+        name: settings.name,
+        tagline: settings.tagline,
+        phone: settings.phone,
+        whatsapp: settings.whatsapp,
+        whatsappInternational: settings.whatsappInternational,
+        serviceArea: settings.serviceArea,
+        openingHours: settings.openingHours,
+        deliveryFee: settings.deliveryFee.toString(),
+        aboutStory: settings.aboutStory || '',
+        heroEyebrow: settings.heroEyebrow || 'AUTHENTIC GHANAIAN FLAVOUR',
+        heroHeading: settings.heroHeading || 'Your Favourite Ghanaian Meals, Made with Love.',
+        heroSubheading:
+          settings.heroSubheading ||
+          'From delicious jollof and freshly prepared waakye to banku with grilled tilapia, discover the comforting taste of Ghana at Jales Kitchen.',
+        heroNote: settings.heroNote || 'Good food. Great taste. Ghanaian goodness.',
+        heroImageUrl:
+          settings.heroImageUrl ||
+          'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=1200&q=85',
+      });
+    }
+  }, [settings, isDirty]);
+
+  const handleHeroImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setHeroImageError('Image size exceeds 5MB limit. Please choose a smaller file.');
+    if (file.size > 15 * 1024 * 1024) {
+      setHeroImageError('Image file is very large (over 15MB). Please choose an image under 15MB.');
       return;
     }
 
-    setHeroImageError(null);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      setForm((prev) => ({ ...prev, heroImageUrl: result }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      setIsUploadingImage(true);
+      setHeroImageError(null);
+      setIsDirty(true);
+      // Compress and optimize image to high-res web quality (max 1600px, 0.85 JPEG)
+      const compressedDataUrl = await compressImageFile(file, 1600, 1600, 0.85);
+      setForm((prev) => ({ ...prev, heroImageUrl: compressedDataUrl }));
+    } catch {
+      setHeroImageError('Could not process this image. Please provide a direct image URL or try another file.');
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavedSuccess(false);
 
-    await updateSettings({
+    const success = await updateSettings({
       name: form.name.trim(),
       tagline: form.tagline.trim(),
       phone: form.phone.trim(),
@@ -84,8 +119,11 @@ export const AdminSettingsPage: React.FC = () => {
       heroImageUrl: form.heroImageUrl.trim(),
     });
 
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    if (success) {
+      setIsDirty(false);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 3000);
+    }
   };
 
   const copySqlSchema = () => {
@@ -277,9 +315,28 @@ CREATE POLICY "Admin manage all settings" ON public.site_settings FOR ALL USING 
                 <input
                   type="text"
                   value={form.tagline}
-                  onChange={(e) => setForm({ ...form, tagline: e.target.value })}
+                  onChange={(e) => {
+                    const newTagline = e.target.value;
+                    setIsDirty(true);
+                    setForm((prev) => {
+                      const wasMatching =
+                        !prev.heroHeading ||
+                        prev.heroHeading === prev.tagline ||
+                        prev.heroHeading === 'Your Favourite Ghanaian Meals, Made with Love.' ||
+                        prev.heroHeading === 'Your Favourite Ghanaian Meals, Made with Love';
+                      return {
+                        ...prev,
+                        tagline: newTagline,
+                        heroHeading: wasMatching ? newTagline : prev.heroHeading,
+                      };
+                    });
+                  }}
+                  placeholder="e.g. Your Favourite Ghanaian Meals, Made with Love"
                   className="w-full px-3.5 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden"
                 />
+                <p className="text-[11px] text-stone-500 mt-1">
+                  Visible across the header, footer, about story, and homepage hero.
+                </p>
               </div>
             </div>
 
@@ -462,12 +519,22 @@ CREATE POLICY "Admin manage all settings" ON public.site_settings FOR ALL USING 
                     placeholder="https://... or upload below"
                     className="flex-1 w-full px-3.5 py-2.5 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden"
                   />
-                  <label className="cursor-pointer bg-stone-100 hover:bg-stone-200 px-4 py-2.5 rounded-xl text-xs font-semibold text-stone-700 flex items-center gap-1.5 transition-colors shrink-0">
-                    <Upload className="w-4 h-4 text-[#F57C00]" />
-                    <span>Upload New Image</span>
+                  <label className="cursor-pointer bg-stone-100 hover:bg-stone-200 px-4 py-2.5 rounded-xl text-xs font-semibold text-stone-700 flex items-center gap-1.5 transition-colors shrink-0 disabled:opacity-50">
+                    {isUploadingImage ? (
+                      <>
+                        <Loader2 className="w-4 h-4 text-[#F57C00] animate-spin" />
+                        <span>Optimizing Image...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 text-[#F57C00]" />
+                        <span>Upload New Image</span>
+                      </>
+                    )}
                     <input
                       type="file"
                       accept="image/*"
+                      disabled={isUploadingImage}
                       onChange={handleHeroImageFileChange}
                       className="hidden"
                     />

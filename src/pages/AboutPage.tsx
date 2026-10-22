@@ -47,7 +47,8 @@ export const AboutPage: React.FC = () => {
             Our Story, Our Food, Our Ghanaian Roots
           </h1>
           <p className="text-base sm:text-lg text-stone-600 mt-4 leading-relaxed">
-            At Jales Kitchen, we celebrate the rich flavours and comforting meals that make Ghanaian food special.
+            {settings.tagline ? `${settings.tagline} — ` : ''}
+            At {settings.name || 'Jales Kitchen'}, we celebrate the rich flavours and comforting meals that make Ghanaian food special.
           </p>
         </div>
       </section>

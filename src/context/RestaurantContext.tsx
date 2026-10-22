@@ -172,10 +172,18 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           .from('site_settings')
           .select('value')
           .eq('key', 'restaurant_info')
-          .single();
+          .maybeSingle();
 
         if (settData?.value) {
-          setSettings((prev) => ({ ...prev, ...settData.value }));
+          setSettings((prev) => {
+            const merged = { ...prev, ...settData.value };
+            try {
+              localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
+            } catch (e) {
+              console.warn('LocalStorage error on settings fetch sync:', e);
+            }
+            return merged;
+          });
         }
 
         // Fetch orders if accessible
@@ -552,22 +560,38 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const updateSettings = async (newSettings: Partial<RestaurantSettings>): Promise<boolean> => {
+    let mergedSettings: RestaurantSettings = { ...settings, ...newSettings };
+
     setSettings((prev) => {
-      const merged = { ...prev, ...newSettings };
-      return merged;
+      mergedSettings = { ...prev, ...newSettings };
+      try {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(mergedSettings));
+      } catch (e) {
+        console.warn('LocalStorage error on settings update:', e);
+      }
+      return mergedSettings;
     });
 
     if (isSupabaseConfigured() && supabase) {
       try {
-        await supabase
+        const { error } = await supabase
           .from('site_settings')
-          .upsert({
-            key: 'restaurant_info',
-            value: { ...settings, ...newSettings },
-            updated_at: new Date().toISOString(),
-          });
+          .upsert(
+            {
+              key: 'restaurant_info',
+              value: mergedSettings,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'key' }
+          );
+
+        if (error) {
+          console.error('Failed to update Supabase site_settings:', error);
+          return false;
+        }
       } catch (err) {
         console.warn('Failed to update Supabase site_settings:', err);
+        return false;
       }
     }
 

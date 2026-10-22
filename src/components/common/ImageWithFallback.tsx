@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UtensilsCrossed } from 'lucide-react';
 
 interface ImageWithFallbackProps {
@@ -16,6 +16,11 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 }) => {
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    setError(false);
+    setLoaded(false);
+  }, [src]);
 
   // If error occurs, render a warm, styled food illustration placeholder
   if (error || !src) {

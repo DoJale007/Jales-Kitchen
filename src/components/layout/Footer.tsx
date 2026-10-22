@@ -22,6 +22,7 @@ export const Footer: React.FC = () => {
               </span>
             </div>
             <p className="text-stone-400 text-sm leading-relaxed">
+              {settings.tagline ? `${settings.tagline}. ` : ''}
               Serving authentic, freshly prepared Ghanaian meals with the true flavours of home.
               Good food, great taste, and warm Ghanaian hospitality.
             </p>

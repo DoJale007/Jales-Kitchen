@@ -73,8 +73,8 @@ export const Navbar: React.FC = () => {
                 <span className="font-['Poppins'] font-bold text-xl sm:text-2xl text-[#171717] tracking-tight leading-none">
                   Jales <span className="text-[#C62828]">Kitchen</span>
                 </span>
-                <span className="text-[11px] font-medium tracking-wider uppercase text-[#F57C00]">
-                  Authentic Ghanaian Food
+                <span className="text-[11px] font-medium tracking-wider uppercase text-[#F57C00] truncate max-w-[180px] sm:max-w-xs">
+                  {settings.tagline || 'Authentic Ghanaian Food'}
                 </span>
               </div>
             </Link>

@@ -70,8 +70,8 @@ export const HomePage: React.FC = () => {
 
               {/* Main Heading */}
               <h1 className="font-['Poppins'] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#171717] tracking-tight leading-[1.15]">
-                {settings.heroHeading ? (
-                  settings.heroHeading
+                {settings.heroHeading || settings.tagline ? (
+                  settings.heroHeading || settings.tagline
                 ) : (
                   <>
                     Your Favourite Ghanaian Meals,{' '}
@@ -94,6 +94,15 @@ export const HomePage: React.FC = () => {
                   </>
                 )}
               </h1>
+
+              {/* Tagline / Catchphrase Highlight if distinct from heading */}
+              {settings.tagline &&
+                settings.heroHeading &&
+                settings.tagline.trim() !== settings.heroHeading.trim() && (
+                  <p className="text-sm sm:text-base font-bold text-[#C62828] tracking-wide">
+                    "{settings.tagline}"
+                  </p>
+                )}
 
               {/* Supporting Text */}
               <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
