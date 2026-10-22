@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { safeStorage } from '../utils/storage';
 
 interface AdminUser {
   id: string;
@@ -49,10 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
-        const localSession = localStorage.getItem(AUTH_STORAGE_KEY);
+        const localSession = safeStorage.getItem<AdminUser | null>(AUTH_STORAGE_KEY, null);
         if (localSession) {
-          const parsed = JSON.parse(localSession);
-          setUser(parsed);
+          setUser(localSession);
         }
       } catch (err) {
         console.warn('Session check failed:', err);
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: 'admin',
           };
           setUser(adminUser);
-          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
+          safeStorage.setItem(AUTH_STORAGE_KEY, adminUser);
           setIsLoading(false);
           return { success: true };
         }
@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // 2. Check local bootstrap credentials
-    const currentStoredPass = localStorage.getItem(PASS_HASH_KEY) || BOOTSTRAP_PASS;
+    const currentStoredPass = safeStorage.getItem<string>(PASS_HASH_KEY, BOOTSTRAP_PASS);
     const isDefaultPass = currentStoredPass === BOOTSTRAP_PASS;
 
     if (
@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       setUser(adminUser);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(adminUser));
+      safeStorage.setItem(AUTH_STORAGE_KEY, adminUser);
       setIsLoading(false);
       return { success: true };
     }
@@ -137,11 +137,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    localStorage.setItem(PASS_HASH_KEY, newPass);
+    safeStorage.setItem(PASS_HASH_KEY, newPass);
     if (user) {
       const updatedUser = { ...user, mustChangePassword: false };
       setUser(updatedUser);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
+      safeStorage.setItem(AUTH_STORAGE_KEY, updatedUser);
     }
 
     return { success: true };
@@ -156,7 +156,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    safeStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
   return (

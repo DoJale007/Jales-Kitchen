@@ -15,6 +15,7 @@ import {
 import { useRestaurant } from '../../context/RestaurantContext';
 import { MenuItem } from '../../types';
 import { ImageWithFallback } from '../../components/common/ImageWithFallback';
+import { compressImageFile } from '../../utils/imageCompress';
 
 export const AdminMenuPage: React.FC = () => {
   const {
@@ -84,22 +85,28 @@ export const AdminMenuPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Image Upload handler (supports base64 conversion or Supabase public URL preview)
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Image Upload handler (resizes & compresses photo to avoid exceeding localStorage/database quotas)
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setFormError('Image size exceeds 5MB limit. Please choose a smaller photo.');
+    if (file.size > 15 * 1024 * 1024) {
+      setFormError('Image size exceeds 15MB. Please choose a smaller photo.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      setFormData((prev) => ({ ...prev, image_url: result }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Compress to optimal food photo dimensions (800x800, JPEG 0.8) -> ~60-120KB
+      const compressedDataUrl = await compressImageFile(file, 800, 800, 0.8);
+      setFormData((prev) => ({ ...prev, image_url: compressedDataUrl }));
+    } catch {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setFormData((prev) => ({ ...prev, image_url: result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

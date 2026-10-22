@@ -10,6 +10,7 @@ import {
 } from '../types';
 import { initialCategories, initialMenuItems, initialSettings } from '../data/initialData';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { safeStorage } from '../utils/storage';
 
 interface RestaurantContextType {
   categories: Category[];
@@ -73,35 +74,29 @@ const STORAGE_KEYS = {
 };
 
 export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    return saved ? JSON.parse(saved) : initialCategories;
-  });
+  const [categories, setCategories] = useState<Category[]>(() =>
+    safeStorage.getItem(STORAGE_KEYS.CATEGORIES, initialCategories)
+  );
 
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.MENU_ITEMS);
-    return saved ? JSON.parse(saved) : initialMenuItems;
-  });
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(() =>
+    safeStorage.getItem(STORAGE_KEYS.MENU_ITEMS, initialMenuItems)
+  );
 
-  const [settings, setSettings] = useState<RestaurantSettings>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    return saved ? JSON.parse(saved) : initialSettings;
-  });
+  const [settings, setSettings] = useState<RestaurantSettings>(() =>
+    safeStorage.getItem(STORAGE_KEYS.SETTINGS, initialSettings)
+  );
 
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ORDERS);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [orders, setOrders] = useState<Order[]>(() =>
+    safeStorage.getItem(STORAGE_KEYS.ORDERS, [])
+  );
 
-  const [messages, setMessages] = useState<ContactMessage[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.MESSAGES);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [messages, setMessages] = useState<ContactMessage[]>(() =>
+    safeStorage.getItem(STORAGE_KEYS.MESSAGES, [])
+  );
 
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.CART);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [cart, setCart] = useState<CartItem[]>(() =>
+    safeStorage.getItem(STORAGE_KEYS.CART, [])
+  );
 
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [selectedItemForOrder, setSelectedItemForOrder] = useState<MenuItem | null>(null);
@@ -109,29 +104,29 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [dbError, setDbError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Sync to LocalStorage
+  // Sync to safeStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    safeStorage.setItem(STORAGE_KEYS.CATEGORIES, categories);
   }, [categories]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.MENU_ITEMS, JSON.stringify(menuItems));
+    safeStorage.setItem(STORAGE_KEYS.MENU_ITEMS, menuItems);
   }, [menuItems]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    safeStorage.setItem(STORAGE_KEYS.SETTINGS, settings);
   }, [settings]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+    safeStorage.setItem(STORAGE_KEYS.ORDERS, orders);
   }, [orders]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
+    safeStorage.setItem(STORAGE_KEYS.MESSAGES, messages);
   }, [messages]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+    safeStorage.setItem(STORAGE_KEYS.CART, cart);
   }, [cart]);
 
   // Initial load from Supabase if configured
@@ -177,11 +172,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (settData?.value) {
           setSettings((prev) => {
             const merged = { ...prev, ...settData.value };
-            try {
-              localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
-            } catch (e) {
-              console.warn('LocalStorage error on settings fetch sync:', e);
-            }
+            safeStorage.setItem(STORAGE_KEYS.SETTINGS, merged);
             return merged;
           });
         }
@@ -564,11 +555,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     setSettings((prev) => {
       mergedSettings = { ...prev, ...newSettings };
-      try {
-        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(mergedSettings));
-      } catch (e) {
-        console.warn('LocalStorage error on settings update:', e);
-      }
+      safeStorage.setItem(STORAGE_KEYS.SETTINGS, mergedSettings);
       return mergedSettings;
     });
 
@@ -602,9 +589,9 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setCategories(initialCategories);
     setMenuItems(initialMenuItems);
     setSettings(initialSettings);
-    localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
-    localStorage.removeItem(STORAGE_KEYS.MENU_ITEMS);
-    localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+    safeStorage.removeItem(STORAGE_KEYS.CATEGORIES);
+    safeStorage.removeItem(STORAGE_KEYS.MENU_ITEMS);
+    safeStorage.removeItem(STORAGE_KEYS.SETTINGS);
   };
 
   return (
