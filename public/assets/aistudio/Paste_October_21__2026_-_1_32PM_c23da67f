@@ -1,0 +1,1099 @@
+# PROJECT: JALES KITCHEN — PROFESSIONAL GHANAIAN RESTAURANT WEBSITE
+
+## 1. ROLE
+
+Act as a senior full-stack web developer, UI/UX designer, restaurant brand strategist, database architect, and deployment engineer.
+
+Build a complete, professional, responsive, multi-page restaurant website for **Jales Kitchen**, a Ghanaian food business serving authentic, freshly prepared Ghanaian meals to customers in Accra and across its service areas in Ghana.
+
+The website must be production-oriented, functional, visually attractive, easy to maintain, and suitable for deployment using **Google AI Studio for development, Supabase for the database and storage, and Vercel for hosting**.
+
+Do not build just a static mockup or a landing page. Build a functional website with separate pages, working navigation, a food ordering system, an admin dashboard, persistent database integration, and clear instructions for configuration and deployment.
+
+## 2. AUDIENCE
+
+The primary audience is Ghanaians who enjoy delicious local food and want to browse meals, view prices, and conveniently place orders using WhatsApp.
+
+The target customers include:
+
+- Workers looking for convenient lunch and dinner.
+- Students and young professionals.
+- Families ordering meals for home.
+- Customers who enjoy traditional Ghanaian dishes.
+- People ordering food for offices, gatherings, and small events.
+
+Design the experience for people browsing on mobile phones, especially customers using Android smartphones and WhatsApp.
+
+Use familiar Ghanaian food names, Ghana cedi pricing (GH₵), straightforward language, and an easy ordering process.
+
+## 3. PROJECT GOAL
+
+Create a distinctive digital storefront for Jales Kitchen that enables customers to:
+
+1. Discover Jales Kitchen and its food offerings.
+2. Explore an attractive collection of Ghanaian dishes.
+3. View food images, descriptions, prices, and availability.
+4. Select food and submit an order form.
+5. Send their completed order directly to the restaurant's WhatsApp number: **057-157-0126**.
+6. Learn about the restaurant and its food philosophy.
+7. Find the restaurant's contact information and service details.
+
+The restaurant owner must also be able to access a protected admin dashboard to add new food items, upload images, edit prices and descriptions, update availability, and manage the menu without editing code.
+
+The website should be simple enough for a non-technical business owner to operate.
+
+## 4. BRAND IDENTITY AND DESIGN SYSTEM
+
+### Brand name
+
+Jales Kitchen
+
+### Brand personality
+
+- Authentic Ghanaian hospitality.
+- Delicious, fresh, satisfying food.
+- Friendly and welcoming.
+- Modern, trustworthy, and professional.
+- Locally inspired without looking old-fashioned.
+- Premium presentation at accessible prices.
+
+### Color palette
+
+Use these four brand colors consistently:
+
+- **Primary red:** `#C62828` — primary buttons, important actions, active navigation states, and brand accents.
+- **Warm orange:** `#F57C00` — food highlights, promotional labels, icons, and secondary accents.
+- **Charcoal black:** `#171717` — headings, navigation text, footer backgrounds, and strong contrast.
+- **Clean white:** `#FFFFFF` — page backgrounds, cards, content sections, and visual breathing space.
+
+Use light neutral backgrounds such as `#FFF8F2` sparingly to create warmth.
+
+Do not use all four colors at equal intensity. Maintain a balanced hierarchy: white and warm neutrals for space, black for readability, red for primary actions, and orange for selective highlights.
+
+### Typography
+
+Use **Poppins** for headings and **Inter** for body text, navigation, form fields, prices, and supporting content.
+
+Typography must be clear, readable, modern, and consistent across all pages.
+
+Use bold, confident headings and comfortable line spacing. Avoid excessively decorative fonts, oversized text that harms usability, and inconsistent typography.
+
+### Overall visual direction
+
+Create a clean, contemporary Ghanaian restaurant experience with:
+
+- Large, appetizing food photography.
+- Spacious layouts and consistent margins.
+- Strong visual hierarchy.
+- Rounded but restrained card corners.
+- Subtle shadows and borders.
+- Elegant hover effects.
+- Consistent button shapes and sizes.
+- Smooth, restrained transitions.
+- Clear food categories and prices.
+- Strong mobile responsiveness.
+
+Avoid generic restaurant templates, excessive gradients, excessive animations, cluttered layouts, random decorative elements, and unnecessary sections.
+
+The final design should look custom-designed specifically for Jales Kitchen.
+
+## 5. WEBSITE STRUCTURE AND MULTI-PAGE NAVIGATION
+
+Build the following dedicated pages. Each navigation link must open its own functional route. Do not create a single-page website in which every navigation item merely scrolls to a section.
+
+### A. HOME PAGE — `/`
+
+The home page should immediately communicate what Jales Kitchen sells and encourage visitors to order food.
+
+#### Header and navigation
+
+Create a responsive header containing:
+
+- Jales Kitchen logo or a simple, tasteful text-based logo.
+- Home.
+- About Us.
+- Menu.
+- Contact.
+- A prominent "Order Now" button.
+- A small admin dashboard icon, such as a shield, key, or user-cog icon, positioned discreetly at the right side of the header.
+
+The admin icon must link to `/admin/login`. Do not expose admin controls directly on the public website.
+
+On mobile, use a compact header and a functional hamburger menu.
+
+Keep the header visually clean and optionally sticky while scrolling.
+
+#### Hero section
+
+Create a visually powerful hero section with an attractive, high-resolution photograph of authentic Ghanaian food.
+
+Use an image showing a beautifully presented plate of Ghanaian jollof rice accompanied by chicken, shito, and a fresh garnish, or an appetizing spread of multiple Ghanaian dishes.
+
+The image must be prominent, sharp, and large enough to capture attention immediately. It should feel like professional restaurant photography rather than a low-quality stock image.
+
+Use a two-column layout on desktop, with persuasive text on one side and a large food image on the other. On mobile, stack the text and image elegantly.
+
+Use this sample copy:
+
+Eyebrow: "AUTHENTIC GHANAIAN FLAVOUR"
+
+Main heading: "Your Favourite Ghanaian Meals, Made with Love."
+
+Supporting text: "From delicious jollof and freshly prepared waakye to banku with grilled tilapia, discover the comforting taste of Ghana at Jales Kitchen."
+
+Primary button: "Explore Our Menu"
+
+Secondary button: "Order on WhatsApp"
+
+Include a small supporting line such as "Good food. Great taste. Ghanaian goodness."
+
+Do not place too much text over the food image. Ensure the headline has sufficient contrast and is readable on all screen sizes.
+
+#### Featured food section
+
+Heading: "A Taste of Ghana"
+
+Supporting text: "Discover some of the delicious meals waiting for you."
+
+Display six food cards featuring real food photography, dish names, short descriptions, Ghana cedi prices, and functional order buttons.
+
+Use these editable sample menu items:
+
+1. **Jales Special Jollof** — GH₵45
+   "Flavour-packed Ghanaian jollof rice served with seasoned chicken, fresh garnish, and shito."
+
+2. **Waakye Special** — GH₵40
+   "A satisfying serving of waakye with spaghetti, gari, egg, stew, and your choice of available protein."
+
+3. **Banku with Grilled Tilapia** — GH₵85
+   "Soft banku served with grilled tilapia, fresh pepper, and sliced vegetables."
+
+4. **Plain Rice with Chicken Stew** — GH₵40
+   "Fluffy white rice served with rich Ghanaian tomato stew and seasoned chicken."
+
+5. **Fufu with Light Soup** — GH₵65
+   "Soft fufu served with aromatic Ghanaian light soup and an available protein option."
+
+6. **Fried Yam with Chicken** — GH₵45
+   "Golden fried yam served with spicy pepper sauce and seasoned chicken."
+
+These are placeholder prices and descriptions for the initial demonstration. Store them in Supabase so the owner can change them later. Clearly indicate that prices, portions, and availability must be confirmed by the restaurant before launch.
+
+Every card must contain:
+
+- Food image.
+- Food name.
+- Short description.
+- Price in GH₵.
+- Optional availability label.
+- "Order Now" button.
+
+Clicking a card or its order button should open the appropriate order form with that food item already selected.
+
+Add a "View Full Menu" button that navigates to `/menu`.
+
+#### Why choose Jales Kitchen?
+
+Create a concise section with three or four benefits:
+
+- Authentic Ghanaian Flavours — familiar meals prepared with care.
+- Freshly Prepared — a focus on freshness, taste, and quality.
+- Easy Ordering — conveniently send your order through WhatsApp.
+- Friendly Service — a welcoming experience from selection to delivery or pickup.
+
+Do not make unverified claims about certifications, delivery speed, or food sourcing.
+
+#### Popular Ghanaian favourites
+
+Create a visually engaging section showcasing some of Ghana's favourite foods, such as:
+
+- Jollof rice.
+- Waakye.
+- Banku and tilapia.
+- Fufu and light soup.
+- Banku and okro stew.
+- Kenkey with fried fish and pepper.
+- Red-red with fried plantain.
+- Ampesi with kontomire stew.
+- Tuo zaafi with soup.
+- Gari and beans.
+
+Use a carefully selected subset so the page remains simple and uncluttered.
+
+#### Call-to-action section
+
+Heading: "Craving Something Delicious?"
+
+Text: "Your next favourite Ghanaian meal is just a few clicks away."
+
+Buttons:
+
+- "Browse Menu" → `/menu`
+- "Chat with Us" → WhatsApp chat with 057-157-0126.
+
+#### Footer
+
+Include:
+
+- Jales Kitchen logo or name.
+- Short restaurant description.
+- Links to Home, About Us, Menu, and Contact.
+- Telephone and WhatsApp contact.
+- Business hours, editable by the administrator.
+- Service area, editable by the administrator.
+- Social media links, configurable through the admin dashboard.
+- Copyright notice with the current year.
+
+Do not invent a street address, email address, social media profile, or opening hours.
+
+## 6. ABOUT US PAGE — `/about`
+
+Create a dedicated About Us page that introduces the brand and communicates its passion for Ghanaian food.
+
+### Page hero
+
+Heading: "Our Story, Our Food, Our Ghanaian Roots"
+
+Supporting text: "At Jales Kitchen, we celebrate the rich flavours and comforting meals that make Ghanaian food special."
+
+Use a high-quality photograph of Ghanaian food or a welcoming kitchen setting.
+
+### Our story
+
+Use this initial draft:
+
+"Jales Kitchen was created around a simple love for good food and the rich culinary traditions of Ghana. From the irresistible aroma of jollof rice to the comforting taste of waakye, banku, and traditional soups, we celebrate the meals that bring people together.
+
+Our aim is to make delicious Ghanaian food easy to discover and order, while giving every customer a warm and welcoming experience.
+
+Whether you are enjoying a familiar favourite or trying something different, Jales Kitchen invites you to share in the goodness of Ghanaian cuisine."
+
+Treat this as editable sample copy that the restaurant owner can update.
+
+### Our values
+
+Display four simple value cards:
+
+- Taste and Quality.
+- Careful Preparation.
+- Ghanaian Food Culture.
+- Customer Satisfaction.
+
+### Food gallery
+
+Show a small, attractive gallery of Ghanaian meals using real, relevant images.
+
+### Call to action
+
+Heading: "Come and Enjoy the Taste of Ghana."
+
+Button: "Explore Our Menu" → `/menu`.
+
+Keep the content warm, authentic, and concise. Do not invent a founding year, awards, founder biography, or restaurant history.
+
+## 7. MENU PAGE — `/menu`
+
+This page is the main food discovery and ordering page.
+
+### Page introduction
+
+Heading: "Our Menu"
+
+Supporting text: "Explore the Ghanaian meals you love, prepared to make every bite enjoyable."
+
+### Menu categories
+
+Create functional category filters such as:
+
+- All Meals.
+- Rice Dishes.
+- Traditional Meals.
+- Grilled and Fried.
+- Soups and Swallows.
+- Sides and Extras.
+- Drinks.
+
+Categories must be editable or manageable through the admin interface where practical.
+
+Include a search field that allows customers to search by food name or description.
+
+### Menu item cards
+
+Each card must display:
+
+- A relevant, high-quality food image.
+- Food name.
+- Description.
+- Price in GH₵.
+- Category.
+- Availability status.
+- An "Order Now" button.
+
+Use these initial food items as editable seed data:
+
+**Rice dishes**
+
+- Jollof Rice with Chicken — GH₵45.
+- Plain Rice with Chicken Stew — GH₵40.
+- Fried Rice with Chicken — GH₵50.
+- Waakye Special — GH₵40.
+- Rice Balls with Groundnut Soup — GH₵55.
+
+**Traditional Ghanaian meals**
+
+- Fufu with Light Soup — GH₵65.
+- Banku with Grilled Tilapia — GH₵85.
+- Banku with Okro Stew — GH₵55.
+- Kenkey with Fried Fish — GH₵45.
+- Tuo Zaafi with Soup — GH₵50.
+- Ampesi with Kontomire Stew — GH₵45.
+- Red-Red with Fried Plantain — GH₵40.
+
+**Grilled and fried meals**
+
+- Grilled Tilapia with Pepper — GH₵75.
+- Fried Yam with Chicken — GH₵45.
+- Fried Plantain with Beans — GH₵35.
+
+**Sides and extras**
+
+- Fried Plantain — GH₵15.
+- Extra Chicken — GH₵20.
+- Boiled Egg — GH₵5.
+- Extra Shito — GH₵5.
+- Gari — GH₵5.
+
+**Drinks**
+
+- Sobolo — GH₵10.
+- Fresh Fruit Juice — GH₵15.
+- Bottled Water — GH₵5.
+
+These prices are placeholders. Do not hard-code menu items into the frontend as the permanent source of truth. Retrieve the active menu from Supabase and allow the administrator to modify the entries.
+
+Use sensible default image assignments, but ensure the image accurately represents the food. Never use the same unrelated food image for every card.
+
+If an image cannot load, show a graceful fallback image rather than a broken image icon.
+
+### Food ordering interaction
+
+Clicking a food card or "Order Now" must open a dedicated order modal or a separate order page with the selected food item prefilled.
+
+The form must support selecting quantities and adding multiple items to a single order where practical.
+
+Customers must be able to change quantities, remove items, and review their order before submitting it.
+
+Do not force users to create an account just to place an order.
+
+## 8. CONTACT PAGE — `/contact`
+
+Create a dedicated Contact page with a simple, professional layout.
+
+### Contact introduction
+
+Heading: "We Would Love to Hear From You"
+
+Text: "Have a question about our meals, want to place an order, or need help choosing your favourite dish? Get in touch with Jales Kitchen."
+
+### Contact information
+
+Display:
+
+- Phone: 057-157-0126.
+- WhatsApp: 057-157-0126.
+- Service area: Editable through the admin dashboard.
+- Opening hours: Editable through the admin dashboard.
+
+Do not invent a physical restaurant address or email address. If these details are not supplied, provide editable placeholders in the admin settings and hide empty fields from the public page.
+
+### Contact form
+
+Fields:
+
+- Full name.
+- Phone number.
+- Email address, optional.
+- Subject.
+- Message.
+
+Validate all required fields and display clear success and error messages.
+
+Provide a "Chat on WhatsApp" button that opens a WhatsApp conversation with the restaurant.
+
+If the contact form is connected to Supabase, save submissions to a dedicated contact messages table. Provide appropriate database access controls and prevent public access to other customers' messages.
+
+## 9. FOOD ORDERING SYSTEM
+
+This is one of the most important features of the website.
+
+The customer must be able to select one or more meals, provide delivery or pickup details, review the order, and send the complete order to the restaurant through WhatsApp.
+
+### Order form fields
+
+When a customer clicks "Order Now", open an attractive, mobile-friendly order form.
+
+Include:
+
+1. Full name — required.
+2. Phone number — required.
+3. Selected food item or items — required.
+4. Quantity for each item — required, minimum 1.
+5. Delivery method — delivery or pickup.
+6. Delivery location or address — required for delivery.
+7. Area or neighbourhood — required for delivery.
+8. Google Maps location link or location instructions — optional.
+9. Preferred delivery or pickup date — optional.
+10. Preferred time — optional.
+11. Additional instructions — optional.
+12. Payment preference — optional, such as cash on delivery, payment on pickup, or "Confirm with restaurant".
+13. Order summary.
+14. Food subtotal.
+15. Delivery fee, if configured.
+16. Total amount.
+
+Use a clear note that delivery fees and availability may need confirmation by the restaurant.
+
+Do not claim that payment has been completed simply because the customer selected a payment preference. Do not integrate a fake payment gateway.
+
+### Order submission and WhatsApp redirection
+
+After the customer completes the form and clicks "Place Order on WhatsApp":
+
+1. Validate all required fields.
+2. Confirm that the selected food items and quantities are valid.
+3. Calculate the subtotal from current menu prices.
+4. Calculate the total using the configured delivery fee, where applicable.
+5. Generate a clear, readable order summary.
+6. Save the order to Supabase if the database is available and the submission is valid.
+7. Redirect the customer to WhatsApp using the restaurant's number.
+8. Prefill a message containing all order details.
+9. Allow the customer to press Send in WhatsApp to deliver the message to the restaurant.
+
+Use this WhatsApp destination:
+
+`https://wa.me/233571570126`
+
+The international number must be digits only, without spaces, hyphens, or the leading zero.
+
+Construct the WhatsApp message safely using `encodeURIComponent()`.
+
+Example prefilled message:
+
+"Hello Jales Kitchen! I would like to place an order.
+
+ORDER DETAILS
+Order reference: JK-XXXXXX
+
+CUSTOMER DETAILS
+Name: [Customer Name]
+Phone: [Customer Phone]
+
+ITEMS
+
+1. Jales Special Jollof x 2 — GH₵90.00
+2. Sobolo x 1 — GH₵10.00
+
+Subtotal: GH₵100.00
+Delivery fee: GH₵[Configured Fee]
+Total: GH₵[Calculated Total]
+
+Order type: Delivery
+Location: [Customer Location]
+Area: [Customer Area]
+Preferred time: [Preferred Time]
+Payment preference: [Selected Preference]
+Additional instructions: [Instructions]
+
+Please confirm availability and delivery arrangements. Thank you!"
+
+The order reference must be generated dynamically.
+
+Use `window.location.href` or a reliable new-tab approach to open the prefilled WhatsApp conversation. Ensure this works on mobile devices.
+
+Important: WhatsApp prefilled messages do not automatically send messages. The customer must confirm and send the message in WhatsApp.
+
+### Order reliability
+
+If Supabase saving fails, do not silently claim that the order has been saved. Display a clear warning and provide a way to retry saving or continue to WhatsApp if the customer chooses.
+
+Do not lose the order form data unnecessarily when an error occurs.
+
+Prevent accidental duplicate submissions by disabling the submit button while processing.
+
+Store timestamps in a consistent format and handle local display appropriately.
+
+## 10. ADMIN DASHBOARD
+
+Build a separate, protected administration interface with these routes:
+
+- `/admin/login`
+- `/admin`
+- `/admin/menu`
+- `/admin/orders`
+- `/admin/messages`
+- `/admin/settings`
+
+The small admin icon in the public website header must open `/admin/login`.
+
+### Initial administrator access
+
+The requested initial admin password is:
+
+`Cocane@007`
+
+Use this password only as a bootstrap credential for setting up the first administrator. Do not hard-code it into public frontend code, commit it to GitHub, or expose it through client-side JavaScript.
+
+Implement secure authentication using Supabase Auth.
+
+Configure the first administrator through a secure setup process, such as a server-side setup script or protected initialization procedure. Store any bootstrap secret in a server-only environment variable, never in a variable prefixed with `VITE_` or another publicly exposed frontend prefix.
+
+If the platform supports secure server-side environment configuration, use it to initialize the admin account. Do not silently create a permanent administrator account with a publicly accessible password.
+
+Require the administrator to change the initial password after the first login.
+
+Protect all admin pages with authentication checks. A user must not be able to bypass the login page by manually navigating to an admin URL.
+
+If authentication is not configured, show a clear setup message rather than pretending the dashboard is secure.
+
+### Admin dashboard layout
+
+Build a clean dashboard with:
+
+- Sidebar navigation on desktop.
+- Responsive navigation on mobile.
+- Dashboard overview.
+- Menu management.
+- Order records.
+- Contact messages.
+- Restaurant settings.
+- Logout button.
+
+Use the Jales Kitchen red, black, orange, and white color palette.
+
+### Dashboard overview
+
+Show useful summary cards:
+
+- Total menu items.
+- Available food items.
+- Unavailable food items.
+- Total recorded orders.
+- Recent orders.
+- Recent contact messages.
+
+Only display real database statistics. Do not use fake sales figures or invented order counts.
+
+### Menu management
+
+Allow the administrator to:
+
+- Add new food items.
+- Edit existing food items.
+- Delete food items, with confirmation.
+- Upload food images.
+- Replace existing images.
+- Change food names.
+- Edit descriptions.
+- Update prices.
+- Select food categories.
+- Mark items as available or unavailable.
+- Feature selected dishes on the home page.
+- Change the order in which items appear.
+- Manage optional labels such as "Popular" or "Chef's Special".
+
+Store food images in Supabase Storage, not as permanent local project files.
+
+Validate uploaded files by file type and size. Display an image preview before saving.
+
+Confirm successful operations and show useful errors if saving fails.
+
+Deleting a food item should not accidentally destroy historical order records. Prefer deactivation or soft deletion when an item has appeared in existing orders.
+
+### Order management
+
+Display orders that were successfully saved to Supabase.
+
+Include:
+
+- Order reference.
+- Customer name.
+- Customer phone.
+- Ordered items and quantities.
+- Order total.
+- Delivery or pickup.
+- Customer location, where applicable.
+- Date and time.
+- Order status.
+
+Allow authorized administrators to update order statuses, such as:
+
+- Pending.
+- Confirmed.
+- Preparing.
+- Ready for pickup.
+- Out for delivery.
+- Completed.
+- Cancelled.
+
+Make it clear that these are internal management statuses, not proof that a WhatsApp message was sent or payment was received.
+
+### Contact messages
+
+Display contact form submissions in the dashboard.
+
+Allow the administrator to view message details and mark messages as read or responded to.
+
+Only authorized administrators may read or modify customer messages.
+
+### Restaurant settings
+
+Provide editable settings for:
+
+- Restaurant name.
+- Logo.
+- Short business description.
+- WhatsApp number.
+- Contact phone number.
+- Service area.
+- Opening hours.
+- Delivery fee.
+- Free delivery threshold, if used.
+- Supported order types.
+- Social media URLs.
+- About page content.
+- Contact page information.
+- Homepage promotional text.
+
+The WhatsApp number should initially be set to 057-157-0126.
+
+Persist changes to Supabase so they remain available after refreshing the page or deploying a new version.
+
+## 11. SUPABASE DATABASE AND STORAGE
+
+Use Supabase as the persistent backend.
+
+Create a maintainable database schema with appropriate relationships, indexes, constraints, and Row Level Security (RLS).
+
+Recommended tables:
+
+### `profiles`
+
+- `id` — UUID, references the authenticated Supabase user.
+- `full_name` — text.
+- `role` — text, restricted to authorized roles.
+- `created_at` — timestamp.
+
+Only authorized administrators should be able to assign or modify administrative roles. Never allow public registration to grant an administrator role.
+
+### `categories`
+
+- `id` — UUID.
+- `name` — text.
+- `slug` — text.
+- `sort_order` — integer.
+- `is_active` — boolean.
+- `created_at` — timestamp.
+
+### `menu_items`
+
+- `id` — UUID.
+- `name` — text.
+- `slug` — text.
+- `description` — text.
+- `price` — numeric, non-negative.
+- `image_url` — text, nullable.
+- `category_id` — UUID, nullable foreign key.
+- `is_available` — boolean.
+- `is_featured` — boolean.
+- `sort_order` — integer.
+- `created_at` — timestamp.
+- `updated_at` — timestamp.
+- `deleted_at` — timestamp, nullable if implementing soft deletion.
+
+### `orders`
+
+- `id` — UUID.
+- `order_number` — unique text reference.
+- `customer_name` — text.
+- `customer_phone` — text.
+- `delivery_method` — text.
+- `delivery_address` — text, nullable for pickup.
+- `delivery_area` — text, nullable for pickup.
+- `location_link` — text, nullable.
+- `preferred_date` — date, nullable.
+- `preferred_time` — text, nullable.
+- `payment_preference` — text, nullable.
+- `subtotal` — numeric.
+- `delivery_fee` — numeric.
+- `total` — numeric.
+- `additional_instructions` — text, nullable.
+- `status` — text with an allowed set of values.
+- `created_at` — timestamp.
+
+### `order_items`
+
+- `id` — UUID.
+- `order_id` — UUID, references `orders`.
+- `menu_item_id` — UUID, nullable if an item is later deleted.
+- `item_name` — text snapshot.
+- `unit_price` — numeric snapshot.
+- `quantity` — integer greater than zero.
+- `line_total` — numeric.
+
+Preserve item names and prices as snapshots so old order totals remain accurate after menu changes.
+
+### `contact_messages`
+
+- `id` — UUID.
+- `full_name` — text.
+- `phone` — text.
+- `email` — text, nullable.
+- `subject` — text.
+- `message` — text.
+- `is_read` — boolean.
+- `created_at` — timestamp.
+
+### `site_settings`
+
+- `id` — UUID.
+- `key` — unique text.
+- `value` — JSONB or an appropriately typed field.
+- `updated_at` — timestamp.
+- `updated_by` — UUID referencing the administrator, where applicable.
+
+Use appropriate additional tables only when they provide a clear benefit.
+
+### Security requirements
+
+Enable RLS on all relevant tables.
+
+Public visitors may read only active, publicly visible menu categories and available menu items, plus the settings explicitly intended for public display.
+
+Public visitors must not be allowed to list all customer orders, read contact messages, update order statuses, change menu items, or modify site settings.
+
+Use Supabase Auth and verified administrator roles for privileged operations.
+
+Do not rely on frontend checks alone for authorization.
+
+If public customers need to submit orders without creating accounts, implement a carefully restricted submission mechanism. Validate the request server-side, restrict fields and allowed values, recalculate totals from trusted menu data, and apply rate limiting or equivalent abuse protection.
+
+Do not expose privileged database credentials.
+
+### Supabase Storage
+
+Create a dedicated bucket for menu images, such as `menu-images`.
+
+Configure appropriate upload permissions so only authorized administrators can upload, replace, or delete menu images.
+
+Public access to images may be enabled if the images are intended to appear on the public website, but public write access must not be enabled.
+
+Use stable public URLs or the appropriate Supabase image URL mechanism.
+
+### Database setup deliverables
+
+Generate:
+
+- SQL migration files.
+- Table definitions.
+- Foreign keys and indexes.
+- RLS policies.
+- Storage configuration instructions.
+- Initial seed data for the sample menu.
+- Secure administrator setup instructions.
+- A clear explanation of how to connect the project to a Supabase instance.
+
+Make the schema reproducible in a fresh Supabase project.
+
+## 12. TECHNICAL STACK
+
+Use a modern, stable, Vercel-compatible stack.
+
+Preferred choices:
+
+- React.
+- TypeScript.
+- Vite.
+- React Router for separate pages.
+- Tailwind CSS or a consistent, maintainable CSS approach.
+- Lucide React for icons.
+- Supabase JavaScript client.
+- React Hook Form and Zod, if useful, for form handling and validation.
+
+Use a consistent project structure and reusable components.
+
+Recommended components include:
+
+- `Navbar`
+- `MobileMenu`
+- `Footer`
+- `FoodCard`
+- `FoodGrid`
+- `MenuFilters`
+- `OrderForm`
+- `OrderSummary`
+- `WhatsAppButton`
+- `AdminLayout`
+- `AdminSidebar`
+- `ProtectedAdminRoute`
+- `MenuItemForm`
+- `ImageUploader`
+- `OrderTable`
+- `ContactForm`
+- `LoadingState`
+- `ErrorState`
+- `EmptyState`
+
+Keep public pages, admin pages, data access, types, validation schemas, and reusable components organized into appropriate directories.
+
+Use TypeScript types for menu items, orders, order items, categories, site settings, and admin profiles.
+
+Avoid unnecessary dependencies and do not introduce complex architecture without a clear need.
+
+## 13. IMAGE AND FOOD PHOTOGRAPHY REQUIREMENTS
+
+Use genuine-looking, high-quality photographs of Ghanaian food.
+
+The most important images are:
+
+- Ghanaian jollof rice with chicken.
+- Waakye with accompaniments.
+- Banku with grilled tilapia and pepper.
+- Plain rice with stew.
+- Fufu with light soup.
+- Kenkey with fried fish.
+- Red-red with fried plantain.
+- Fried yam and chicken.
+- Sobolo and other drinks.
+
+Use reliable image sources or properly generated food photography, and make sure the assets can legally be used for a commercial restaurant website.
+
+If using remote images, verify that the URLs work and that the host permits embedding. Prefer uploading approved images to Supabase Storage for reliability.
+
+Use appropriately sized images, responsive image layouts, and lazy loading where suitable.
+
+Avoid broken external image links, irrelevant images, repeated images across unrelated meals, and excessively large assets that slow the website.
+
+Use meaningful alt text for accessibility.
+
+## 14. UI/UX AND RESPONSIVENESS
+
+The website must work smoothly across:
+
+- Small Android phones.
+- iPhones.
+- Tablets.
+- Laptops.
+- Desktop monitors.
+
+Implement:
+
+- Responsive navigation.
+- Consistent spacing.
+- Readable typography.
+- Large touch-friendly buttons.
+- Clear form labels.
+- Visible keyboard focus states.
+- Good color contrast.
+- Accessible dialog and modal behavior.
+- Proper loading indicators.
+- Useful validation messages.
+- Empty states and error states.
+- Confirmation before destructive actions.
+- Appropriate image aspect ratios.
+- Optimized loading performance.
+
+Avoid horizontal overflow, clipped text, overlapping sections, tiny controls, and layouts that only work on desktop.
+
+Make ordering especially convenient on mobile, where many customers will use WhatsApp.
+
+## 15. SEO AND PERFORMANCE
+
+Implement:
+
+- Page-specific document titles.
+- Meta descriptions.
+- Canonical URL support where appropriate.
+- Open Graph metadata.
+- Semantic HTML.
+- Descriptive image alt attributes.
+- A suitable favicon.
+- `robots.txt`.
+- A sitemap where appropriate.
+- Restaurant structured data using Schema.org only for verified business details.
+
+Do not invent an address, opening hours, reviews, ratings, or geographical coordinates for structured data.
+
+Optimize performance through:
+
+- Image compression and responsive image sizing.
+- Lazy loading below-the-fold images.
+- Efficient React rendering.
+- Appropriate caching.
+- Avoiding unnecessary libraries.
+- Avoiding unnecessary network requests.
+- Graceful loading and error states.
+
+## 16. VERCEL DEPLOYMENT AND ERROR PREVENTION
+
+Build the project specifically to deploy successfully on Vercel.
+
+### Environment variables
+
+Provide a `.env.example` file containing only variable names and safe placeholders, such as:
+
+`VITE_SUPABASE_URL=`
+`VITE_SUPABASE_ANON_KEY=`
+
+Use the current Supabase publishable key convention if supported by the chosen project setup.
+
+Never put the Supabase service-role key, secret API keys, admin passwords, or other privileged credentials in frontend environment variables.
+
+If server-side functions are used, configure server-only environment variables separately.
+
+### Routing
+
+Configure Vercel rewrites or an appropriate `vercel.json` so direct navigation and page refreshes work for:
+
+- `/`
+- `/about`
+- `/menu`
+- `/contact`
+- `/admin/login`
+- `/admin`
+- `/admin/menu`
+- `/admin/orders`
+- `/admin/messages`
+- `/admin/settings`
+
+Ensure that the React application loads correctly when users open these URLs directly.
+
+### Build reliability
+
+Before considering the project complete:
+
+1. Install and verify all required dependencies.
+2. Run the production build.
+3. Resolve all TypeScript errors.
+4. Resolve missing imports and invalid component references.
+5. Resolve package version conflicts.
+6. Verify environment variable handling.
+7. Check that no secrets are included in the client bundle.
+8. Verify routing and refresh behavior.
+9. Check Supabase connection and failure handling.
+10. Verify that the project works without a configured database by displaying an explicit setup state rather than crashing, where practical.
+11. Check that remote image failures do not break the layout.
+12. Ensure no development-only URLs are hard-coded into production code.
+
+Provide a deployment guide covering:
+
+- Creating a Supabase project.
+- Applying database migrations.
+- Configuring Storage and RLS.
+- Creating the first administrator securely.
+- Setting environment variables in Vercel.
+- Connecting a GitHub repository.
+- Deploying the project.
+- Testing the production website.
+
+Do not claim that the website is deployed or that integrations work unless they have actually been tested.
+
+## 17. FUNCTIONAL ACCEPTANCE TESTS
+
+Before finishing, verify or provide a practical test checklist for the following:
+
+### Public website
+
+- Every navigation link opens its dedicated page.
+- The website works on mobile and desktop.
+- Food images and prices load correctly.
+- Menu filters and search work.
+- Featured food items appear on the homepage.
+- The contact form validates input.
+- Empty menu and error states are handled gracefully.
+
+### Ordering
+
+- Clicking a food item opens the order form.
+- The selected food and price are prefilled.
+- Customers can select multiple items where supported.
+- Quantities and totals update correctly.
+- Delivery requires location information.
+- Pickup does not require a delivery address.
+- The order reference is generated correctly.
+- The WhatsApp message contains all relevant details.
+- The WhatsApp destination is `https://wa.me/233571570126`.
+- The user is not falsely told that WhatsApp sent the message automatically.
+- Database failures produce understandable feedback.
+
+### Admin
+
+- The admin icon opens the login page.
+- Unauthenticated users cannot access protected admin functionality.
+- The initial administrator can be set up securely.
+- Administrators can add, edit, and deactivate food items.
+- Uploaded images persist in Supabase Storage.
+- Updated menu information appears on the public site.
+- Authorized users can view recorded orders and update statuses.
+- Unauthorized users cannot read private orders or contact messages.
+- Site settings persist after refreshing the website.
+
+### Deployment
+
+- Production build completes without errors.
+- Vercel routing works after refreshing nested pages.
+- No privileged secrets appear in browser code.
+- The Supabase schema and RLS policies are reproducible.
+- All required environment variables are documented.
+
+## 18. REQUIRED OUTPUT AND IMPLEMENTATION PROCESS
+
+Work through the project in a structured sequence.
+
+**Phase 1 — Project foundation**
+
+- Establish the project structure.
+- Define routes and the design system.
+- Create shared layout components.
+- Configure fonts, icons, and responsive styles.
+
+**Phase 2 — Public website**
+
+- Build the Home, About Us, Menu, and Contact pages.
+- Add realistic food imagery and editable sample content.
+- Implement search, category filters, and food selection.
+
+**Phase 3 — Ordering**
+
+- Build the order form.
+- Implement validation, quantities, and calculations.
+- Integrate the WhatsApp ordering workflow.
+- Connect order persistence to Supabase.
+
+**Phase 4 — Administration**
+
+- Implement secure administrator authentication.
+- Build the dashboard and protected routes.
+- Implement menu management, image uploads, order management, messages, and settings.
+
+**Phase 5 — Backend and security**
+
+- Create SQL migrations, seed data, RLS policies, and Storage rules.
+- Validate privileged operations.
+- Verify that public users cannot access protected information.
+
+**Phase 6 — Testing and deployment**
+
+- Run the production build.
+- Fix errors before moving forward.
+- Verify the main customer and administrator workflows.
+- Prepare the Vercel deployment configuration and documentation.
+
+If a required external integration cannot be completed because credentials or access are missing, implement the appropriate integration structure and clearly identify what remains to be configured. Never silently replace a real database with temporary in-memory data and claim that the website is production-ready.
+
+### Final instruction
+
+Build Jales Kitchen as a polished, custom-designed Ghanaian restaurant website with excellent user experience, real food photography, dedicated pages, a functional menu, convenient WhatsApp ordering, secure administration, persistent Supabase data, and reliable Vercel deployment.
+
+Prioritize correctness, simplicity, visual quality, security, and maintainability over unnecessary complexity.
+
+Do not stop after generating a homepage screenshot. Produce the actual application files and implement the features in the specified sequence. Verify the production build and report any remaining setup requirements honestly.

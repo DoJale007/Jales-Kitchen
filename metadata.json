@@ -1,0 +1,8 @@
+{
+  "name": "Jales Kitchen — Authentic Ghanaian Restaurant",
+  "description": "Professional Ghanaian restaurant website with authentic meals, multi-page navigation, seamless WhatsApp ordering, and a Supabase-ready admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
