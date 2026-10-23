@@ -7,7 +7,6 @@ import {
   Sparkles,
   Clock,
   HeartHandshake,
-  CheckCircle,
   Flame,
 } from 'lucide-react';
 import { useRestaurant } from '../context/RestaurantContext';
@@ -20,39 +19,6 @@ export const HomePage: React.FC = () => {
   // Pick the 6 featured items
   const featuredItems = menuItems.filter((item) => item.is_featured).slice(0, 6);
 
-  // Popular Ghanaian Favourites collection for the visual showcase
-  const popularStaples = [
-    {
-      title: 'Ghanaian Jollof Rice',
-      description: 'Smoky, firewood-style tomato-infused rice cooked with rich local seasoning and herbs.',
-      image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      title: 'Waakye Special',
-      description: 'Rice and beans simmered with dried sorghum leaves, served with spaghetti, gari, and shito.',
-      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      title: 'Banku & Charcoal Tilapia',
-      description: 'Fermented corn and cassava dough paired with juicy charcoal-grilled tilapia and hot raw pepper.',
-      image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      title: 'Fufu with Light Soup',
-      description: 'Silky pounded cassava and plantain immersed in spiced aromatic goat meat light soup.',
-      image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      title: 'Kenkey with Fried Fish',
-      description: 'Authentic Ga kenkey with crispy golden fish, fresh ground pepper, and dark savory shito.',
-      image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      title: 'Red-Red & Fried Plantain',
-      description: 'Tender black-eyed beans in palm oil gravy served with sweet, caramelized plantain slices.',
-      image: 'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=600&q=80',
-    },
-  ];
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-16">
@@ -149,6 +115,9 @@ export const HomePage: React.FC = () => {
 
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white aspect-4/3 sm:aspect-square">
                   <ImageWithFallback
+                    priority={true}
+                    width={900}
+                    quality={78}
                     src={
                       settings.heroImageUrl ||
                       'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=1200&q=85'
@@ -284,69 +253,6 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. POPULAR GHANAIAN FAVOURITES SHOWCASE */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-[#F57C00]">
-              Tradition & Culture
-            </span>
-            <h2 className="font-['Poppins'] text-2xl sm:text-3xl font-extrabold text-[#171717] mt-1">
-              Popular Ghanaian Favourites
-            </h2>
-            <p className="text-stone-600 text-sm mt-1 max-w-xl">
-              From comforting swallows to spicy street-style delicacies, explore what makes Ghana's
-              culinary heritage so beloved.
-            </p>
-          </div>
-          <Link
-            to="/menu"
-            className="text-sm font-bold text-[#C62828] hover:underline flex items-center gap-1.5 shrink-0"
-          >
-            <span>See entire menu items</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {popularStaples.map((dish, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-2xl overflow-hidden border border-stone-200/80 shadow-xs hover:shadow-md transition-shadow flex flex-col"
-            >
-              <div className="h-44 w-full overflow-hidden bg-stone-100">
-                <ImageWithFallback
-                  src={dish.image}
-                  alt={dish.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-['Poppins'] font-bold text-base text-[#171717] mb-1.5">
-                    {dish.title}
-                  </h3>
-                  <p className="text-xs text-stone-600 leading-relaxed">
-                    {dish.description}
-                  </p>
-                </div>
-                <div className="pt-4 mt-2 border-t border-stone-100 flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-stone-500 flex items-center gap-1">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-600" />
-                    Available on Menu
-                  </span>
-                  <Link
-                    to="/menu"
-                    className="text-xs font-bold text-[#C62828] hover:text-[#b02222]"
-                  >
-                    Order Now →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* 5. CALL TO ACTION SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

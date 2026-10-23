@@ -33,6 +33,9 @@ export const FoodCard: React.FC<FoodCardProps> = ({ item }) => {
           src={item.image_url}
           alt={item.name}
           fallbackText={item.name}
+          width={480}
+          quality={72}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
@@ -66,26 +69,26 @@ export const FoodCard: React.FC<FoodCardProps> = ({ item }) => {
       </div>
 
       {/* Content Section */}
-      <div className="p-5 flex-1 flex flex-col justify-between">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
           <div className="flex items-start justify-between gap-2 mb-1.5">
-            <h3 className="font-['Poppins'] font-bold text-lg text-[#171717] group-hover:text-[#C62828] transition-colors line-clamp-1">
+            <h3 className="font-['Poppins'] font-bold text-base sm:text-lg text-[#171717] group-hover:text-[#C62828] transition-colors line-clamp-1">
               {item.name}
             </h3>
           </div>
-          <p className="text-stone-600 text-xs sm:text-sm line-clamp-2 leading-relaxed mb-4">
+          <p className="text-stone-600 text-xs sm:text-sm line-clamp-2 leading-relaxed mb-3 sm:mb-4">
             {item.description}
           </p>
         </div>
 
-        {/* Action Controls */}
+        {/* Action Controls - Mobile Friendly with 44px+ hit targets */}
         <div className="pt-2 border-t border-stone-100 flex items-center justify-between gap-2">
           {/* Quick Add Button */}
           <button
             type="button"
             onClick={handleAddOne}
             disabled={!item.is_available}
-            className={`p-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+            className={`min-h-[44px] px-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer select-none active:scale-95 ${
               inCart
                 ? 'bg-orange-50 text-[#F57C00] border border-orange-200'
                 : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
@@ -94,12 +97,12 @@ export const FoodCard: React.FC<FoodCardProps> = ({ item }) => {
           >
             {inCart ? (
               <>
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-4 h-4" />
                 <span>{inCart.quantity} in order</span>
               </>
             ) : (
               <>
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 <span>Add</span>
               </>
             )}
@@ -110,13 +113,13 @@ export const FoodCard: React.FC<FoodCardProps> = ({ item }) => {
             type="button"
             onClick={handleOrderDirect}
             disabled={!item.is_available}
-            className={`flex-1 py-2 px-3 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+            className={`flex-1 min-h-[44px] py-2.5 px-3 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer select-none ${
               item.is_available
                 ? 'bg-[#C62828] hover:bg-[#b02222] text-white active:scale-95'
                 : 'bg-stone-200 text-stone-500 cursor-not-allowed'
             }`}
           >
-            <ShoppingBag className="w-3.5 h-3.5" />
+            <ShoppingBag className="w-4 h-4" />
             <span>{item.is_available ? 'Order Now' : 'Unavailable'}</span>
           </button>
         </div>

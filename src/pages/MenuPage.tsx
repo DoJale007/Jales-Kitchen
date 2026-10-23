@@ -63,7 +63,7 @@ export const MenuPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search dishes (e.g. Jollof, Waakye, Banku, Tilapia, Sobolo)..."
-              className="w-full pl-12 pr-10 py-3 text-sm sm:text-base bg-white border border-stone-200 rounded-full shadow-xs focus:outline-hidden focus:border-[#C62828] focus:ring-2 focus:ring-red-100 transition-all"
+              className="w-full pl-12 pr-10 py-3 text-base sm:text-sm bg-white border border-stone-200 rounded-full shadow-xs focus:outline-hidden focus:border-[#C62828] focus:ring-2 focus:ring-red-100 transition-all"
             />
             {searchQuery && (
               <button
@@ -76,11 +76,11 @@ export const MenuPage: React.FC = () => {
             )}
           </div>
 
-          {/* Category Tabs */}
-          <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {/* Category Tabs with smooth mobile touch scrolling */}
+          <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto py-1 px-1 -mx-1 scrollbar-none touch-pan-x">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer select-none active:scale-95 ${
                 selectedCategory === 'all'
                   ? 'bg-[#C62828] text-white shadow-md'
                   : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
@@ -96,7 +96,7 @@ export const MenuPage: React.FC = () => {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-4 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer select-none active:scale-95 ${
                     isSelected
                       ? 'bg-[#C62828] text-white shadow-md'
                       : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'

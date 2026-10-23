@@ -397,14 +397,14 @@ export const OrderModal: React.FC = () => {
                       Full Name <span className="text-[#C62828]">*</span>
                     </label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+                      <User className="w-4 h-4 text-stone-400 absolute left-3 top-3.5" />
                       <input
                         type="text"
                         required
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="e.g. Kwame Mensah"
-                        className="w-full pl-9 pr-3 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828] transition-colors"
+                        className="w-full pl-9 pr-3 py-2.5 text-base sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828] transition-colors"
                       />
                     </div>
                   </div>
@@ -414,14 +414,14 @@ export const OrderModal: React.FC = () => {
                       Phone Number (WhatsApp) <span className="text-[#C62828]">*</span>
                     </label>
                     <div className="relative">
-                      <Phone className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+                      <Phone className="w-4 h-4 text-stone-400 absolute left-3 top-3.5" />
                       <input
                         type="tel"
                         required
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="e.g. 0244123456"
-                        className="w-full pl-9 pr-3 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828] transition-colors"
+                        className="w-full pl-9 pr-3 py-2.5 text-base sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828] transition-colors"
                       />
                     </div>
                   </div>
@@ -474,7 +474,7 @@ export const OrderModal: React.FC = () => {
                           value={deliveryArea}
                           onChange={(e) => setDeliveryArea(e.target.value)}
                           placeholder="e.g. East Legon, Spintex, Osu"
-                          className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-xl focus:outline-hidden focus:border-[#C62828]"
+                          className="w-full px-3 py-2 text-base sm:text-sm bg-white border border-stone-200 rounded-xl focus:outline-hidden focus:border-[#C62828]"
                         />
                       </div>
                       <div>
@@ -487,7 +487,7 @@ export const OrderModal: React.FC = () => {
                           value={deliveryAddress}
                           onChange={(e) => setDeliveryAddress(e.target.value)}
                           placeholder="Street name, house number or prominent landmark"
-                          className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-xl focus:outline-hidden focus:border-[#C62828]"
+                          className="w-full px-3 py-2 text-base sm:text-sm bg-white border border-stone-200 rounded-xl focus:outline-hidden focus:border-[#C62828]"
                         />
                       </div>
                     </div>
@@ -497,13 +497,13 @@ export const OrderModal: React.FC = () => {
                         Google Maps Location link or Directions (optional)
                       </label>
                       <div className="relative">
-                        <MapPin className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
+                        <MapPin className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
                         <input
                           type="text"
                           value={locationLink}
                           onChange={(e) => setLocationLink(e.target.value)}
                           placeholder="Paste Google Maps link or special gate instructions"
-                          className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-stone-200 rounded-xl focus:outline-hidden focus:border-[#C62828]"
+                          className="w-full pl-9 pr-3 py-2 text-base sm:text-sm bg-white border border-stone-200 rounded-xl focus:outline-hidden focus:border-[#C62828]"
                         />
                       </div>
                     </div>
@@ -534,7 +534,7 @@ export const OrderModal: React.FC = () => {
                       type="date"
                       value={preferredDate}
                       onChange={(e) => setPreferredDate(e.target.value)}
-                      className="w-full px-3 py-2 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828]"
+                      className="w-full px-3 py-2 text-base sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828]"
                     />
                   </div>
 
@@ -548,7 +548,7 @@ export const OrderModal: React.FC = () => {
                       value={preferredTime}
                       onChange={(e) => setPreferredTime(e.target.value)}
                       placeholder="e.g. ASAP / 1:30 PM"
-                      className="w-full px-3 py-2 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828]"
+                      className="w-full px-3 py-2 text-base sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828]"
                     />
                   </div>
 
@@ -560,7 +560,7 @@ export const OrderModal: React.FC = () => {
                     <select
                       value={paymentPreference}
                       onChange={(e) => setPaymentPreference(e.target.value)}
-                      className="w-full px-3 py-2 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828] cursor-pointer"
+                      className="w-full px-3 py-2 text-base sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828] cursor-pointer"
                     >
                       <option value="Cash on Delivery">Cash on Delivery</option>
                       <option value="Mobile Money (MoMo) on Delivery">Mobile Money (MoMo)</option>
@@ -579,7 +579,7 @@ export const OrderModal: React.FC = () => {
                     value={additionalInstructions}
                     onChange={(e) => setAdditionalInstructions(e.target.value)}
                     placeholder="e.g. Mild pepper please, extra shito on the side, pack separately..."
-                    className="w-full px-3 py-2 text-xs sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828]"
+                    className="w-full px-3 py-2 text-base sm:text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:outline-hidden focus:border-[#C62828]"
                   />
                 </div>
               </div>
