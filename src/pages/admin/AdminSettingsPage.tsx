@@ -1,24 +1,96 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Save,
   CheckCircle,
   Database,
   Copy,
   Check,
-  AlertTriangle,
   RotateCcw,
-  ExternalLink,
-  ShieldAlert,
   Upload,
   Image as ImageIcon,
   Loader2,
+  Lock,
+  KeyRound,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Shield,
 } from 'lucide-react';
 import { useRestaurant } from '../../context/RestaurantContext';
+import { useAuth } from '../../context/AuthContext';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { compressImageFile } from '../../utils/imageCompress';
 
 export const AdminSettingsPage: React.FC = () => {
-  const { settings, updateSettings, resetToDefaultData, isDbConnected } = useRestaurant();
+  const { settings, updateSettings, resetToDefaultData } = useRestaurant();
+  const { user, changePassword, isCustomPassword } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tabQuery = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<'info' | 'security' | 'supabase' | 'deployment'>(
+    tabQuery === 'security' ? 'security' : 'info'
+  );
+
+  // Sync tab with URL query parameter
+  useEffect(() => {
+    if (tabQuery === 'security') {
+      setActiveTab('security');
+    }
+  }, [tabQuery]);
+
+  const handleTabChange = (tab: 'info' | 'security' | 'supabase' | 'deployment') => {
+    setActiveTab(tab);
+    if (tab === 'security') {
+      setSearchParams({ tab: 'security' });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  // Password update form state
+  const [currentPass, setCurrentPass] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [passError, setPassError] = useState<string | null>(null);
+  const [passSuccess, setPassSuccess] = useState<string | null>(null);
+  const [isUpdatingPass, setIsUpdatingPass] = useState(false);
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPassError(null);
+    setPassSuccess(null);
+
+    if (newPass.length < 6) {
+      setPassError('New password must be at least 6 characters long.');
+      return;
+    }
+    if (newPass !== confirmPass) {
+      setPassError('The new passwords do not match. Please verify and re-type.');
+      return;
+    }
+
+    setIsUpdatingPass(true);
+    try {
+      const res = await changePassword(newPass, currentPass ? currentPass : undefined);
+      if (res.success) {
+        setPassSuccess('Admin password updated successfully! Please use this new password on your subsequent sign-ins.');
+        setCurrentPass('');
+        setNewPass('');
+        setConfirmPass('');
+      } else {
+        setPassError(res.error || 'Failed to update administrator password.');
+      }
+    } catch (err: any) {
+      setPassError(err.message || 'An error occurred while updating the password.');
+    } finally {
+      setIsUpdatingPass(false);
+    }
+  };
 
   const [form, setForm] = useState({
     name: settings.name,
@@ -44,7 +116,6 @@ export const AdminSettingsPage: React.FC = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
-  const [activeTab, setActiveTab] = useState<'info' | 'supabase' | 'deployment'>('info');
   const [heroImageError, setHeroImageError] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -250,10 +321,10 @@ CREATE POLICY "Admin manage all settings" ON public.site_settings FOR ALL USING 
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-stone-200 gap-4 text-xs sm:text-sm font-semibold">
+      <div className="flex border-b border-stone-200 gap-4 text-xs sm:text-sm font-semibold overflow-x-auto pb-0.5">
         <button
-          onClick={() => setActiveTab('info')}
-          className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer ${
+          onClick={() => handleTabChange('info')}
+          className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer shrink-0 ${
             activeTab === 'info'
               ? 'border-[#C62828] text-[#C62828]'
               : 'border-transparent text-stone-500 hover:text-stone-800'
@@ -262,8 +333,19 @@ CREATE POLICY "Admin manage all settings" ON public.site_settings FOR ALL USING 
           General Business Info
         </button>
         <button
-          onClick={() => setActiveTab('supabase')}
-          className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer ${
+          onClick={() => handleTabChange('security')}
+          className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer shrink-0 flex items-center gap-1.5 ${
+            activeTab === 'security'
+              ? 'border-[#C62828] text-[#C62828]'
+              : 'border-transparent text-stone-500 hover:text-stone-800'
+          }`}
+        >
+          <KeyRound className="w-4 h-4" />
+          <span>Admin Password & Security</span>
+        </button>
+        <button
+          onClick={() => handleTabChange('supabase')}
+          className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer shrink-0 ${
             activeTab === 'supabase'
               ? 'border-[#C62828] text-[#C62828]'
               : 'border-transparent text-stone-500 hover:text-stone-800'
@@ -272,8 +354,8 @@ CREATE POLICY "Admin manage all settings" ON public.site_settings FOR ALL USING 
           Supabase Database & SQL
         </button>
         <button
-          onClick={() => setActiveTab('deployment')}
-          className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer ${
+          onClick={() => handleTabChange('deployment')}
+          className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer shrink-0 ${
             activeTab === 'deployment'
               ? 'border-[#C62828] text-[#C62828]'
               : 'border-transparent text-stone-500 hover:text-stone-800'
@@ -608,6 +690,184 @@ CREATE POLICY "Admin manage all settings" ON public.site_settings FOR ALL USING 
               )}
             </div>
           </form>
+        </div>
+      )}
+
+      {/* TAB 2: Admin Password & Security */}
+      {activeTab === 'security' && (
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/80 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-red-50 text-[#C62828] flex items-center justify-center">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <h2 className="font-['Poppins'] font-bold text-xl text-[#171717]">
+                  Admin Password & Security
+                </h2>
+              </div>
+              <p className="text-xs sm:text-sm text-stone-500 mt-1">
+                Manage your credentials for accessing the Jales Kitchen administration portal.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border ${
+                  isCustomPassword
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>{isCustomPassword ? 'Custom Password Active' : 'Default Bootstrap Password Active'}</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Account Overview Box */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-200/80 text-xs text-stone-600">
+            <div>
+              <span className="text-[11px] font-semibold text-stone-400 block uppercase tracking-wider">
+                Admin Account Email
+              </span>
+              <span className="text-sm font-bold text-stone-900 mt-0.5 block">
+                {user?.email || 'admin@jaleskitchen.com'}
+              </span>
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold text-stone-400 block uppercase tracking-wider">
+                Password Status
+              </span>
+              <span className="text-xs text-stone-600 mt-0.5 block font-mono">
+                {isCustomPassword ? 'Custom secret password configured' : 'Using initial bootstrap (Cocane@007)'}
+              </span>
+            </div>
+          </div>
+
+          {/* Alerts */}
+          {passError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-xs sm:text-sm flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-[#C62828] shrink-0 mt-0.5" />
+              <span>{passError}</span>
+            </div>
+          )}
+
+          {passSuccess && (
+            <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-2xl text-xs sm:text-sm flex items-start gap-2.5">
+              <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Password Successfully Updated!</p>
+                <p className="text-xs text-green-700 mt-0.5">{passSuccess}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Password Update Form */}
+          <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-xl">
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-1">
+                Current Password <span className="text-stone-400 font-normal">(Optional if default)</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showCurrentPass ? 'text' : 'password'}
+                  value={currentPass}
+                  onChange={(e) => setCurrentPass(e.target.value)}
+                  placeholder="Enter current password"
+                  className="w-full pl-3.5 pr-10 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPass(!showCurrentPass)}
+                  className="absolute right-3 top-3 text-stone-400 hover:text-stone-600 cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-1">
+                New Admin Password <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPass ? 'text' : 'password'}
+                  required
+                  value={newPass}
+                  onChange={(e) => setNewPass(e.target.value)}
+                  placeholder="Enter new password (at least 6 characters)"
+                  className="w-full pl-3.5 pr-10 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPass(!showNewPass)}
+                  className="absolute right-3 top-3 text-stone-400 hover:text-stone-600 cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-1">
+                Confirm New Password <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPass ? 'text' : 'password'}
+                  required
+                  value={confirmPass}
+                  onChange={(e) => setConfirmPass(e.target.value)}
+                  placeholder="Re-type new password"
+                  className="w-full pl-3.5 pr-10 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPass(!showConfirmPass)}
+                  className="absolute right-3 top-3 text-stone-400 hover:text-stone-600 cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isUpdatingPass}
+                className="bg-[#C62828] hover:bg-[#b02222] text-white px-7 py-3 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 cursor-pointer transition-all active:scale-98 disabled:opacity-50"
+              >
+                {isUpdatingPass ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Updating Password...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Update Admin Password</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Security Guidance */}
+          <div className="mt-8 pt-6 border-t border-stone-100 space-y-2">
+            <h4 className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-[#C62828]" />
+              <span>How your admin password works</span>
+            </h4>
+            <p className="text-xs text-stone-500 leading-relaxed">
+              When updated, your new password takes effect immediately and is synchronized across browser sessions and your connected database. 
+              Subsequent logins to <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-800">/admin/login</code> will require this new password. The initial bootstrap password will be deactivated.
+            </p>
+          </div>
         </div>
       )}
 

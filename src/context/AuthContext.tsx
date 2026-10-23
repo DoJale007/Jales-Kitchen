@@ -14,36 +14,58 @@ interface AuthContextType {
   user: AdminUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isCustomPassword: boolean;
   login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  changePassword: (newPass: string) => Promise<{ success: boolean; error?: string }>;
+  changePassword: (newPass: string, currentPass?: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = 'jales_kitchen_admin_session';
-const PASS_HASH_KEY = 'jales_kitchen_admin_hash';
+export const AUTH_STORAGE_KEY = 'jales_kitchen_admin_session';
+export const PASS_HASH_KEY = 'jales_kitchen_admin_hash';
 
 // Default bootstrap credential per project requirements
-const BOOTSTRAP_EMAIL = 'admin@jaleskitchen.com';
-const BOOTSTRAP_PASS = 'Cocane@007';
+export const BOOTSTRAP_EMAIL = 'admin@jaleskitchen.com';
+export const BOOTSTRAP_PASS = 'Cocane@007';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCustomPassword, setIsCustomPassword] = useState<boolean>(() => {
+    const current = safeStorage.getItem<string>(PASS_HASH_KEY, BOOTSTRAP_PASS);
+    return current !== BOOTSTRAP_PASS;
+  });
 
   useEffect(() => {
     // Check if session exists in storage
     const checkSession = async () => {
       try {
+        // Attempt to sync latest admin password from remote site_settings if available
         if (isSupabaseConfigured() && supabase) {
+          try {
+            const { data: authSetting } = await supabase
+              .from('site_settings')
+              .select('value')
+              .eq('key', 'admin_auth')
+              .maybeSingle();
+
+            if (authSetting?.value?.password) {
+              safeStorage.setItem(PASS_HASH_KEY, authSetting.value.password);
+              setIsCustomPassword(authSetting.value.password !== BOOTSTRAP_PASS);
+            }
+          } catch {
+            // Non-blocking
+          }
+
           const { data } = await supabase.auth.getSession();
           if (data.session?.user) {
             setUser({
               id: data.session.user.id,
-              email: data.session.user.email || 'admin@jaleskitchen.com',
+              email: data.session.user.email || BOOTSTRAP_EMAIL,
               name: 'Restaurant Admin',
               role: 'admin',
+              mustChangePassword: false,
             });
             setIsLoading(false);
             return;
@@ -52,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const localSession = safeStorage.getItem<AdminUser | null>(AUTH_STORAGE_KEY, null);
         if (localSession) {
-          setUser(localSession);
+          setUser({ ...localSession, mustChangePassword: false });
         }
       } catch (err) {
         console.warn('Session check failed:', err);
@@ -81,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: data.user.email || email,
             name: data.user.user_metadata?.full_name || 'Restaurant Admin',
             role: 'admin',
+            mustChangePassword: false,
           };
           setUser(adminUser);
           safeStorage.setItem(AUTH_STORAGE_KEY, adminUser);
@@ -92,9 +115,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // 2. Check local bootstrap credentials
-    const currentStoredPass = safeStorage.getItem<string>(PASS_HASH_KEY, BOOTSTRAP_PASS);
-    const isDefaultPass = currentStoredPass === BOOTSTRAP_PASS;
+    // 2. Fetch latest stored password (from remote site_settings if accessible, then local storage)
+    let currentStoredPass = safeStorage.getItem<string>(PASS_HASH_KEY, BOOTSTRAP_PASS);
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data: authSetting } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'admin_auth')
+          .maybeSingle();
+
+        if (authSetting?.value?.password) {
+          currentStoredPass = authSetting.value.password;
+          safeStorage.setItem(PASS_HASH_KEY, currentStoredPass);
+          setIsCustomPassword(currentStoredPass !== BOOTSTRAP_PASS);
+        }
+      } catch {
+        // Fallback to local storage value
+      }
+    }
 
     if (
       (email.trim().toLowerCase() === BOOTSTRAP_EMAIL.toLowerCase() ||
@@ -107,7 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: email.includes('@') ? email : BOOTSTRAP_EMAIL,
         name: 'Restaurant Admin',
         role: 'admin',
-        mustChangePassword: isDefaultPass,
+        mustChangePassword: false, // NEVER force modal on login
       };
 
       setUser(adminUser);
@@ -119,25 +158,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
     return {
       success: false,
-      error: 'Invalid credentials. Please verify your email and password.',
+      error: 'Invalid administrator credentials. Please check your email and password.',
     };
   };
 
-  const changePassword = async (newPass: string): Promise<{ success: boolean; error?: string }> => {
+  const changePassword = async (newPass: string, currentPass?: string): Promise<{ success: boolean; error?: string }> => {
     if (newPass.length < 6) {
-      return { success: false, error: 'Password must be at least 6 characters long.' };
+      return { success: false, error: 'New password must be at least 6 characters long.' };
     }
 
+    const currentStoredPass = safeStorage.getItem<string>(PASS_HASH_KEY, BOOTSTRAP_PASS);
+
+    // If current password provided, verify it
+    if (currentPass && currentPass !== currentStoredPass) {
+      return { success: false, error: 'The current password you entered is incorrect.' };
+    }
+
+    // 1. If Supabase has an active user session, update it safely without throwing
     if (isSupabaseConfigured() && supabase) {
       try {
-        const { error } = await supabase.auth.updateUser({ password: newPass });
-        if (error) throw error;
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData?.session?.user) {
+          const { error } = await supabase.auth.updateUser({ password: newPass });
+          if (error) {
+            console.warn('Supabase auth.updateUser note:', error.message);
+          }
+        }
       } catch (err: any) {
-        return { success: false, error: err.message };
+        console.warn('Supabase auth session sync bypassed:', err?.message || err);
+      }
+
+      // 2. Persist password in Supabase site_settings so all browsers/devices receive the new password
+      try {
+        await supabase.from('site_settings').upsert(
+          {
+            key: 'admin_auth',
+            value: { password: newPass, updated_at: new Date().toISOString() },
+          },
+          { onConflict: 'key' }
+        );
+      } catch (err) {
+        console.warn('Failed to persist admin_auth to Supabase site_settings:', err);
       }
     }
 
+    // 3. Always update local storage
     safeStorage.setItem(PASS_HASH_KEY, newPass);
+    setIsCustomPassword(newPass !== BOOTSTRAP_PASS);
+
     if (user) {
       const updatedUser = { ...user, mustChangePassword: false };
       setUser(updatedUser);
@@ -165,6 +233,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated: !!user,
         isLoading,
+        isCustomPassword,
         login,
         logout,
         changePassword,

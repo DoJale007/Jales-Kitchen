@@ -122,7 +122,7 @@ export const AdminLoginPage: React.FC = () => {
               Initial Password: <code className="bg-white px-1.5 py-0.5 rounded border border-stone-200">Cocane@007</code>
             </p>
             <p className="text-[10px] text-stone-400 pt-1">
-              You will be prompted to update this password to your personal secret upon logging in.
+              You can update your admin password anytime from the Settings tab on the dashboard.
             </p>
           </div>
 
