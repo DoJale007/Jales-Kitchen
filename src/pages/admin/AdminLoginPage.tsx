@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Flame, Lock, Mail, ArrowLeft, AlertCircle, Info, ShieldCheck } from 'lucide-react';
+import { Flame, Lock, Mail, ArrowLeft, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const AdminLoginPage: React.FC = () => {
-  const [email, setEmail] = useState('admin@jaleskitchen.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,7 +70,7 @@ export const AdminLoginPage: React.FC = () => {
               <div className="relative">
                 <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
                 <input
-                  type="text"
+                  type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -108,23 +108,6 @@ export const AdminLoginPage: React.FC = () => {
               </button>
             </div>
           </form>
-
-          {/* Initial Access Credential Information per project spec */}
-          <div className="mt-6 pt-5 border-t border-stone-100 bg-stone-50 p-3.5 rounded-2xl text-xs text-stone-600 space-y-1.5">
-            <div className="flex items-center gap-1.5 font-semibold text-stone-800">
-              <Info className="w-3.5 h-3.5 text-[#F57C00]" />
-              <span>Initial Administrator Credentials</span>
-            </div>
-            <p className="text-[11px] text-stone-500">
-              Email: <code className="bg-white px-1.5 py-0.5 rounded border border-stone-200">admin@jaleskitchen.com</code>
-            </p>
-            <p className="text-[11px] text-stone-500">
-              Initial Password: <code className="bg-white px-1.5 py-0.5 rounded border border-stone-200">Cocane@007</code>
-            </p>
-            <p className="text-[10px] text-stone-400 pt-1">
-              You can update your admin password anytime from the Settings tab on the dashboard.
-            </p>
-          </div>
 
           <div className="mt-6 text-center">
             <Link
