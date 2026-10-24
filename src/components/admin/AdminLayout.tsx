@@ -141,15 +141,22 @@ export const AdminLayout: React.FC = () => {
         <div className="p-6 border-t border-stone-800 space-y-3">
           <div className="flex items-center justify-between text-xs text-stone-400">
             <div>
-              <p className="font-semibold text-stone-200 truncate">{user?.name || 'Administrator'}</p>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <p className="font-semibold text-stone-200 truncate">{user?.name || 'Administrator'}</p>
+                {user?.role && (
+                  <span className="text-[9px] bg-stone-800 text-[#F57C00] font-bold px-1.5 py-0.5 rounded border border-stone-700">
+                    {user.role}
+                  </span>
+                )}
+              </div>
               <p className="text-[11px] text-stone-400 truncate">{user?.email}</p>
             </div>
             <Link
               to="/admin/settings?tab=security"
-              className="text-[#F57C00] hover:underline text-[11px] font-semibold cursor-pointer"
-              title="Change Password in Settings"
+              className="text-[#F57C00] hover:underline text-[11px] font-semibold cursor-pointer shrink-0"
+              title="Manage passwords and admin team in settings"
             >
-              Password
+              Team & Passwords
             </Link>
           </div>
 

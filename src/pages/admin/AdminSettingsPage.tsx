@@ -17,6 +17,12 @@ import {
   EyeOff,
   AlertCircle,
   Shield,
+  Users,
+  UserPlus,
+  Trash2,
+  Key,
+  X,
+  UserCheck,
 } from 'lucide-react';
 import { useRestaurant } from '../../context/RestaurantContext';
 import { useAuth } from '../../context/AuthContext';
@@ -25,7 +31,15 @@ import { compressImageFile } from '../../utils/imageCompress';
 
 export const AdminSettingsPage: React.FC = () => {
   const { settings, updateSettings, resetToDefaultData } = useRestaurant();
-  const { user, changePassword, isCustomPassword } = useAuth();
+  const {
+    user,
+    changePassword,
+    isCustomPassword,
+    adminTeam,
+    addAdminAccount,
+    removeAdminAccount,
+    updateAdminTeamMemberPassword,
+  } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tabQuery = searchParams.get('tab');
@@ -60,6 +74,27 @@ export const AdminSettingsPage: React.FC = () => {
   const [passSuccess, setPassSuccess] = useState<string | null>(null);
   const [isUpdatingPass, setIsUpdatingPass] = useState(false);
 
+  // Multi-admin team management states
+  const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+  const [newAdminName, setNewAdminName] = useState('');
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [newAdminRole, setNewAdminRole] = useState('Store Manager');
+  const [newAdminPass, setNewAdminPass] = useState('');
+  const [showNewAdminPass, setShowNewAdminPass] = useState(false);
+  const [addAdminError, setAddAdminError] = useState<string | null>(null);
+  const [addAdminSuccess, setAddAdminSuccess] = useState<string | null>(null);
+  const [isAddingAdmin, setIsAddingAdmin] = useState(false);
+
+  // Reset member password modal state
+  const [editingMember, setEditingMember] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [memberNewPass, setMemberNewPass] = useState('');
+  const [memberPassError, setMemberPassError] = useState<string | null>(null);
+  const [memberPassSuccess, setMemberPassSuccess] = useState<string | null>(null);
+  const [isUpdatingMemberPass, setIsUpdatingMemberPass] = useState(false);
+
+  // Member deletion confirm
+  const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
+
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPassError(null);
@@ -89,6 +124,76 @@ export const AdminSettingsPage: React.FC = () => {
       setPassError(err.message || 'An error occurred while updating the password.');
     } finally {
       setIsUpdatingPass(false);
+    }
+  };
+
+  const handleAddAdminSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddAdminError(null);
+    setAddAdminSuccess(null);
+    setIsAddingAdmin(true);
+
+    try {
+      const res = await addAdminAccount({
+        name: newAdminName,
+        email: newAdminEmail,
+        role: newAdminRole,
+        password: newAdminPass,
+      });
+
+      if (res.success) {
+        setAddAdminSuccess(`Administrator "${newAdminName}" successfully added! They can now log into the admin portal with ${newAdminEmail}.`);
+        setNewAdminName('');
+        setNewAdminEmail('');
+        setNewAdminPass('');
+        setNewAdminRole('Store Manager');
+        setTimeout(() => setShowAddAdminModal(false), 2000);
+      } else {
+        setAddAdminError(res.error || 'Failed to add administrator.');
+      }
+    } catch (err: any) {
+      setAddAdminError(err.message || 'An error occurred while creating admin account.');
+    } finally {
+      setIsAddingAdmin(false);
+    }
+  };
+
+  const handleUpdateMemberPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMember) return;
+    setMemberPassError(null);
+    setMemberPassSuccess(null);
+    setIsUpdatingMemberPass(true);
+
+    try {
+      const res = await updateAdminTeamMemberPassword(editingMember.id, memberNewPass);
+      if (res.success) {
+        setMemberPassSuccess(`Password for ${editingMember.name} updated successfully!`);
+        setMemberNewPass('');
+        setTimeout(() => {
+          setEditingMember(null);
+          setMemberPassSuccess(null);
+        }, 1800);
+      } else {
+        setMemberPassError(res.error || 'Failed to update password.');
+      }
+    } catch (err: any) {
+      setMemberPassError(err.message || 'An error occurred.');
+    } finally {
+      setIsUpdatingMemberPass(false);
+    }
+  };
+
+  const handleRemoveMember = async (id: string) => {
+    try {
+      const res = await removeAdminAccount(id);
+      if (res.success) {
+        setDeletingMemberId(null);
+      } else {
+        alert(res.error || 'Failed to remove administrator.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to remove administrator.');
     }
   };
 
@@ -341,7 +446,7 @@ CREATE POLICY "Admin manage all settings" ON public.site_settings FOR ALL USING 
           }`}
         >
           <KeyRound className="w-4 h-4" />
-          <span>Admin Password & Security</span>
+          <span>Admin Password & Team Access</span>
         </button>
         <button
           onClick={() => handleTabChange('supabase')}
@@ -861,13 +966,378 @@ CREATE POLICY "Admin manage all settings" ON public.site_settings FOR ALL USING 
           <div className="mt-8 pt-6 border-t border-stone-100 space-y-2">
             <h4 className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5 text-[#C62828]" />
-              <span>How your admin password works</span>
+              <span>How your personal password works</span>
             </h4>
             <p className="text-xs text-stone-500 leading-relaxed">
               When updated, your new password takes effect immediately and is synchronized across browser sessions and your connected database. 
-              Subsequent logins to <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-800">/admin/login</code> will require this new password. The initial bootstrap password will be deactivated.
+              Subsequent logins to <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-800">/admin/login</code> will require this new password.
             </p>
           </div>
+
+          {/* ADMIN TEAM & MULTI-USER ACCESS SECTION */}
+          <div className="mt-10 pt-8 border-t-2 border-stone-100 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#F57C00] flex items-center justify-center">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-['Poppins'] font-bold text-lg text-stone-900">
+                    Admin Team & Authorized Accounts
+                  </h3>
+                </div>
+                <p className="text-xs text-stone-500 mt-1">
+                  Grant access to trusted co-owners, managers, or kitchen dispatchers so multiple people can update menu items, track orders, and manage the site.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAddAdminError(null);
+                  setAddAdminSuccess(null);
+                  setShowAddAdminModal(true);
+                }}
+                className="bg-[#C62828] hover:bg-[#b02222] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 cursor-pointer transition-all active:scale-98 shrink-0 self-start sm:self-auto"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Add Administrator</span>
+              </button>
+            </div>
+
+            {/* Admin accounts list */}
+            <div className="space-y-3">
+              {adminTeam.map((member) => {
+                const isCurrentLoggedIn = user?.email.toLowerCase() === member.email.toLowerCase();
+                const isSuperAdmin = member.isPrimary || member.role === 'Super Admin';
+
+                return (
+                  <div
+                    key={member.id}
+                    className="p-4 rounded-2xl border border-stone-200 bg-stone-50/50 hover:bg-stone-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#C62828] to-[#F57C00] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                        {member.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-sm text-stone-900">{member.name}</span>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              isSuperAdmin
+                                ? 'bg-red-50 text-[#C62828] border-red-200'
+                                : member.role.includes('Manager')
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            }`}
+                          >
+                            {member.role}
+                          </span>
+                          {isCurrentLoggedIn && (
+                            <span className="text-[10px] bg-stone-200 text-stone-700 font-medium px-2 py-0.5 rounded-full">
+                              You
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-stone-500 font-mono mt-0.5">{member.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                      {member.isPrimary || member.id === 'primary-owner' ? (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 text-stone-500 text-xs font-semibold">
+                          <Lock className="w-3.5 h-3.5 text-stone-400" />
+                          <span>Primary Owner</span>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingMember({ id: member.id, name: member.name, email: member.email });
+                              setMemberNewPass('');
+                              setMemberPassError(null);
+                              setMemberPassSuccess(null);
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                            title="Reset password for this administrator"
+                          >
+                            <Key className="w-3.5 h-3.5 text-stone-400" />
+                            <span>Reset Password</span>
+                          </button>
+
+                          {deletingMemberId === member.id ? (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMember(member.id)}
+                                className="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletingMemberId(null)}
+                                className="px-2 py-1.5 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs transition-colors cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setDeletingMemberId(member.id)}
+                              className="p-2 rounded-lg bg-white hover:bg-red-50 hover:text-red-600 border border-stone-200 text-stone-400 text-xs cursor-pointer transition-colors"
+                              title="Revoke admin access"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Multi-Admin Info Note */}
+            <div className="bg-amber-50/70 border border-amber-200/80 p-4 rounded-2xl flex items-start gap-3">
+              <UserCheck className="w-4 h-4 text-[#F57C00] shrink-0 mt-0.5" />
+              <div className="text-xs text-stone-600 space-y-1">
+                <p className="font-bold text-stone-800">
+                  How Multi-Admin Access Operates
+                </p>
+                <p className="leading-relaxed">
+                  Each administrator added above can sign into <code className="bg-white px-1.5 py-0.5 rounded border border-amber-200 text-stone-800 font-mono">/admin/login</code> with their own email address and assigned password.
+                  Their updates to menu items, order statuses, and website settings are synchronized across all connected devices and your Supabase database.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* MODAL: ADD NEW ADMINISTRATOR */}
+          {showAddAdminModal && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-red-50 text-[#C62828] flex items-center justify-center">
+                      <UserPlus className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-['Poppins'] font-bold text-lg text-stone-900">
+                      Add New Administrator
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddAdminModal(false)}
+                    className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {addAdminError && (
+                  <div className="mt-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-[#C62828]" />
+                    <span>{addAdminError}</span>
+                  </div>
+                )}
+
+                {addAdminSuccess && (
+                  <div className="mt-4 bg-green-50 border border-green-200 text-green-800 p-3 rounded-xl text-xs flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 shrink-0 text-green-600" />
+                    <span>{addAdminSuccess}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleAddAdminSubmit} className="mt-4 space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      Full Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newAdminName}
+                      onChange={(e) => setNewAdminName(e.target.value)}
+                      placeholder="e.g. Kwame Mensah"
+                      className="w-full px-3.5 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      Login Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      placeholder="manager@jaleskitchen.com"
+                      className="w-full px-3.5 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      Role / Position
+                    </label>
+                    <select
+                      value={newAdminRole}
+                      onChange={(e) => setNewAdminRole(e.target.value)}
+                      className="w-full px-3.5 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden cursor-pointer"
+                    >
+                      <option value="Store Manager">Store Manager (Full Admin)</option>
+                      <option value="Co-Administrator">Co-Administrator (Owner Access)</option>
+                      <option value="Kitchen Admin">Kitchen Admin (Menu & Orders)</option>
+                      <option value="Order Dispatcher">Order Dispatcher (Orders & Messages)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      Initial Password <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showNewAdminPass ? 'text' : 'password'}
+                        required
+                        value={newAdminPass}
+                        onChange={(e) => setNewAdminPass(e.target.value)}
+                        placeholder="At least 6 characters"
+                        className="w-full pl-3.5 pr-10 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewAdminPass(!showNewAdminPass)}
+                        className="absolute right-3 top-3 text-stone-400 hover:text-stone-600 cursor-pointer"
+                        tabIndex={-1}
+                      >
+                        {showNewAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddAdminModal(false)}
+                      className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-semibold hover:bg-stone-50 cursor-pointer transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isAddingAdmin}
+                      className="bg-[#C62828] hover:bg-[#b02222] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md flex items-center gap-2 cursor-pointer transition-all active:scale-98 disabled:opacity-50"
+                    >
+                      {isAddingAdmin ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Creating Account...</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="w-3.5 h-3.5" />
+                          <span>Save & Create Admin</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL: RESET MEMBER PASSWORD */}
+          {editingMember && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#F57C00] flex items-center justify-center">
+                      <Key className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-['Poppins'] font-bold text-base text-stone-900">
+                      Reset Password for {editingMember.name}
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditingMember(null)}
+                    className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <p className="text-xs text-stone-500 mt-2">
+                  Enter a new login password for <span className="font-bold text-stone-800">{editingMember.email}</span>.
+                </p>
+
+                {memberPassError && (
+                  <div className="mt-3 bg-red-50 border border-red-200 text-red-700 p-2.5 rounded-xl text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-[#C62828]" />
+                    <span>{memberPassError}</span>
+                  </div>
+                )}
+
+                {memberPassSuccess && (
+                  <div className="mt-3 bg-green-50 border border-green-200 text-green-800 p-2.5 rounded-xl text-xs flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 shrink-0 text-green-600" />
+                    <span>{memberPassSuccess}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleUpdateMemberPasswordSubmit} className="mt-4 space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      New Password <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={memberNewPass}
+                      onChange={(e) => setMemberNewPass(e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="w-full px-3.5 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:border-[#C62828] outline-hidden font-mono"
+                    />
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditingMember(null)}
+                      className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-xs font-semibold hover:bg-stone-50 cursor-pointer transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isUpdatingMemberPass}
+                      className="bg-[#C62828] hover:bg-[#b02222] text-white px-5 py-2 rounded-xl font-bold text-xs shadow-md flex items-center gap-2 cursor-pointer transition-all active:scale-98 disabled:opacity-50"
+                    >
+                      {isUpdatingMemberPass ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Updating...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Save New Password</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

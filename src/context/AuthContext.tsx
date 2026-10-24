@@ -2,12 +2,22 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { safeStorage } from '../utils/storage';
 
-interface AdminUser {
+export interface AdminUser {
   id: string;
   email: string;
   name: string;
-  role: 'admin';
+  role: string;
   mustChangePassword?: boolean;
+}
+
+export interface AdminTeamMember {
+  id: string;
+  email: string;
+  name: string;
+  role: 'Super Admin' | 'Store Manager' | 'Kitchen Admin' | 'Staff Admin' | string;
+  password: string;
+  createdAt: string;
+  isPrimary?: boolean;
 }
 
 interface AuthContextType {
@@ -15,15 +25,20 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isCustomPassword: boolean;
+  adminTeam: AdminTeamMember[];
   login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   changePassword: (newPass: string, currentPass?: string) => Promise<{ success: boolean; error?: string }>;
+  addAdminAccount: (account: { name: string; email: string; role: string; password: string }) => Promise<{ success: boolean; error?: string }>;
+  removeAdminAccount: (id: string) => Promise<{ success: boolean; error?: string }>;
+  updateAdminTeamMemberPassword: (id: string, newPass: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AUTH_STORAGE_KEY = 'jales_kitchen_admin_session';
 export const PASS_HASH_KEY = 'jales_kitchen_admin_hash';
+export const ADMIN_TEAM_STORAGE_KEY = 'jales_kitchen_admin_team';
 
 // Default bootstrap credential per project requirements
 export const BOOTSTRAP_EMAIL = 'admin@jaleskitchen.com';
@@ -37,11 +52,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return current !== BOOTSTRAP_PASS;
   });
 
+  const [adminTeam, setAdminTeam] = useState<AdminTeamMember[]>(() => {
+    const saved = safeStorage.getItem<AdminTeamMember[]>(ADMIN_TEAM_STORAGE_KEY, []);
+    if (saved && saved.length > 0) return saved;
+    return [
+      {
+        id: 'primary-owner',
+        email: 'admin@jaleskitchen.com',
+        name: 'Primary Administrator',
+        role: 'Super Admin',
+        password: BOOTSTRAP_PASS,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        isPrimary: true,
+      },
+    ];
+  });
+
   useEffect(() => {
-    // Check if session exists in storage
+    // Check if session exists in storage & sync remote settings
     const checkSession = async () => {
       try {
-        // Attempt to sync latest admin password from remote site_settings if available
+        // Attempt to sync latest admin password and team from remote site_settings if available
         if (isSupabaseConfigured() && supabase) {
           try {
             const { data: authSetting } = await supabase
@@ -58,12 +89,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Non-blocking
           }
 
+          try {
+            const { data: teamSetting } = await supabase
+              .from('site_settings')
+              .select('value')
+              .eq('key', 'admin_team')
+              .maybeSingle();
+
+            if (Array.isArray(teamSetting?.value) && teamSetting.value.length > 0) {
+              setAdminTeam(teamSetting.value);
+              safeStorage.setItem(ADMIN_TEAM_STORAGE_KEY, teamSetting.value);
+            }
+          } catch {
+            // Non-blocking
+          }
+
           const { data } = await supabase.auth.getSession();
           if (data.session?.user) {
             setUser({
               id: data.session.user.id,
               email: data.session.user.email || BOOTSTRAP_EMAIL,
-              name: 'Restaurant Admin',
+              name: data.session.user.user_metadata?.full_name || 'Restaurant Admin',
               role: 'admin',
               mustChangePassword: false,
             });
@@ -88,12 +134,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, pass: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
 
     // 1. If Supabase configured, attempt Supabase Auth
     if (isSupabaseConfigured() && supabase) {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
+          email: cleanEmail,
           password: pass,
         });
 
@@ -102,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: data.user.id,
             email: data.user.email || email,
             name: data.user.user_metadata?.full_name || 'Restaurant Admin',
-            role: 'admin',
+            role: 'Super Admin',
             mustChangePassword: false,
           };
           setUser(adminUser);
@@ -115,7 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // 2. Fetch latest stored password (from remote site_settings if accessible, then local storage)
+    // 2. Fetch latest stored password for primary admin
     let currentStoredPass = safeStorage.getItem<string>(PASS_HASH_KEY, BOOTSTRAP_PASS);
     if (isSupabaseConfigured() && supabase) {
       try {
@@ -135,18 +182,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
+    // Check primary administrator credentials
     if (
-      (email.trim().toLowerCase() === BOOTSTRAP_EMAIL.toLowerCase() ||
-        email.trim().toLowerCase() === 'admin' ||
-        email.trim().toLowerCase() === 'dojale007@gmail.com') &&
+      (cleanEmail === BOOTSTRAP_EMAIL.toLowerCase() ||
+        cleanEmail === 'admin' ||
+        cleanEmail === 'dojale007@gmail.com') &&
       pass === currentStoredPass
     ) {
       const adminUser: AdminUser = {
-        id: 'admin-local-1',
-        email: email.includes('@') ? email : BOOTSTRAP_EMAIL,
-        name: 'Restaurant Admin',
-        role: 'admin',
-        mustChangePassword: false, // NEVER force modal on login
+        id: 'primary-owner',
+        email: cleanEmail.includes('@') ? cleanEmail : BOOTSTRAP_EMAIL,
+        name: cleanEmail.includes('dojale') ? 'D. Jale (Owner)' : 'Primary Administrator',
+        role: 'Super Admin',
+        mustChangePassword: false,
+      };
+
+      setUser(adminUser);
+      safeStorage.setItem(AUTH_STORAGE_KEY, adminUser);
+      setIsLoading(false);
+      return { success: true };
+    }
+
+    // 3. Check registered Admin Team Members
+    const currentTeam = safeStorage.getItem<AdminTeamMember[]>(ADMIN_TEAM_STORAGE_KEY, adminTeam);
+    const matchedMember = currentTeam.find(
+      (m) => m.email.toLowerCase() === cleanEmail && m.password === pass
+    );
+
+    if (matchedMember) {
+      const adminUser: AdminUser = {
+        id: matchedMember.id,
+        email: matchedMember.email,
+        name: matchedMember.name,
+        role: matchedMember.role || 'Store Manager',
+        mustChangePassword: false,
       };
 
       setUser(adminUser);
@@ -206,10 +275,159 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     safeStorage.setItem(PASS_HASH_KEY, newPass);
     setIsCustomPassword(newPass !== BOOTSTRAP_PASS);
 
+    // Also update primary member password in adminTeam if present
+    const updatedTeam = adminTeam.map((m) => {
+      if (m.isPrimary || m.id === 'primary-owner') {
+        return { ...m, password: newPass };
+      }
+      return m;
+    });
+    setAdminTeam(updatedTeam);
+    safeStorage.setItem(ADMIN_TEAM_STORAGE_KEY, updatedTeam);
+
     if (user) {
       const updatedUser = { ...user, mustChangePassword: false };
       setUser(updatedUser);
       safeStorage.setItem(AUTH_STORAGE_KEY, updatedUser);
+    }
+
+    return { success: true };
+  };
+
+  const addAdminAccount = async (account: {
+    name: string;
+    email: string;
+    role: string;
+    password: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = account.email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      return { success: false, error: 'Please enter a valid email address.' };
+    }
+    if (!account.name.trim()) {
+      return { success: false, error: 'Please enter the admin team member name.' };
+    }
+    if (!account.password || account.password.length < 6) {
+      return { success: false, error: 'Password must be at least 6 characters long.' };
+    }
+
+    // Check duplicate email
+    const exists = adminTeam.some((m) => m.email.toLowerCase() === cleanEmail);
+    if (
+      exists ||
+      cleanEmail === BOOTSTRAP_EMAIL.toLowerCase() ||
+      cleanEmail === 'dojale007@gmail.com'
+    ) {
+      return { success: false, error: 'An administrator account with this email already exists.' };
+    }
+
+    const newMember: AdminTeamMember = {
+      id: `admin-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      name: account.name.trim(),
+      email: cleanEmail,
+      role: account.role || 'Store Manager',
+      password: account.password,
+      createdAt: new Date().toISOString(),
+      isPrimary: false,
+    };
+
+    const updatedTeam = [...adminTeam, newMember];
+    setAdminTeam(updatedTeam);
+    safeStorage.setItem(ADMIN_TEAM_STORAGE_KEY, updatedTeam);
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('site_settings').upsert(
+          {
+            key: 'admin_team',
+            value: updatedTeam,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'key' }
+        );
+      } catch (err) {
+        console.warn('Failed to sync admin_team to Supabase:', err);
+      }
+    }
+
+    return { success: true };
+  };
+
+  const removeAdminAccount = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    const target = adminTeam.find((m) => m.id === id);
+    if (!target) {
+      return { success: false, error: 'Administrator account not found.' };
+    }
+    if (target.isPrimary || target.id === 'primary-owner') {
+      return { success: false, error: 'Cannot remove the primary administrator account.' };
+    }
+    if (user && user.email.toLowerCase() === target.email.toLowerCase()) {
+      return { success: false, error: 'You cannot remove your own active administrator account.' };
+    }
+
+    const updatedTeam = adminTeam.filter((m) => m.id !== id);
+    setAdminTeam(updatedTeam);
+    safeStorage.setItem(ADMIN_TEAM_STORAGE_KEY, updatedTeam);
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('site_settings').upsert(
+          {
+            key: 'admin_team',
+            value: updatedTeam,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'key' }
+        );
+      } catch (err) {
+        console.warn('Failed to sync admin_team deletion to Supabase:', err);
+      }
+    }
+
+    return { success: true };
+  };
+
+  const updateAdminTeamMemberPassword = async (
+    id: string,
+    newPass: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!newPass || newPass.length < 6) {
+      return { success: false, error: 'Password must be at least 6 characters long.' };
+    }
+
+    const target = adminTeam.find((m) => m.id === id);
+    if (!target) {
+      return { success: false, error: 'Administrator account not found.' };
+    }
+
+    const updatedTeam = adminTeam.map((m) => {
+      if (m.id === id) {
+        return { ...m, password: newPass };
+      }
+      return m;
+    });
+
+    setAdminTeam(updatedTeam);
+    safeStorage.setItem(ADMIN_TEAM_STORAGE_KEY, updatedTeam);
+
+    if (target.isPrimary || target.id === 'primary-owner') {
+      safeStorage.setItem(PASS_HASH_KEY, newPass);
+      setIsCustomPassword(newPass !== BOOTSTRAP_PASS);
+    }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('site_settings').upsert(
+          {
+            key: 'admin_team',
+            value: updatedTeam,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'key' }
+        );
+      } catch (err) {
+        console.warn('Failed to sync updated admin password to Supabase:', err);
+      }
     }
 
     return { success: true };
@@ -234,9 +452,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isLoading,
         isCustomPassword,
+        adminTeam,
         login,
         logout,
         changePassword,
+        addAdminAccount,
+        removeAdminAccount,
+        updateAdminTeamMemberPassword,
       }}
     >
       {children}
